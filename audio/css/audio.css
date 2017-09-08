@@ -1,0 +1,166 @@
+@charset 'utf-8';
+
+* {
+	padding: 0;
+	margin: 0;
+}
+
+.none {
+	width: 0;
+	height: 0;
+	visible: hidden;
+}
+
+.audio {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+	width: 1024px;
+	height: 48px;
+	color: #7A7A7C;
+	background: #222225;
+}
+
+.audio * {
+	display: inline-block;
+}
+
+.audio span, 
+.audio div {
+	overflow: hidden;
+}
+
+.audio span {
+	height: 48px;
+	line-height: 48px;
+	text-align: center;
+	font-size: 23px;
+}
+
+.audio span i:hover {
+	color: #fff;
+	cursor: pointer;
+}
+
+.audio-progress div, 
+.audio-volume-adjust div {
+	cursor: pointer;
+}
+
+/*controller相关样式*/
+.audio .audio-controller {
+	width: 195px;
+	height: inherit;
+}
+.audio-controller > span {
+	width: 65px;
+}
+
+/*bar相关样式*/
+.audio .audio-bar {
+	position: relative;
+	width: 650px;
+	height: inherit;
+}
+
+.audio-bar .audio-progress {
+	width: 550px;
+	height: inherit;
+}
+
+.audio-progress > div, 
+.audio-progress > div div:first-child {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 520px;
+	height: 6px;
+	margin: -3px 0 0 -260px;
+	border-radius: 5px;
+	background: #171719;
+	overflow: visible;
+}
+
+.audio-progress > div div:last-child {
+	position: absolute;
+	top: 50%;
+	left: -7px;
+	width: 14px;
+	height: 14px;
+	margin-top: -7px;
+	border-radius: 50%;
+	background: #B82525;
+	box-sizing: border-box;
+	border: 5px solid #fff;
+}
+
+.audio-bar span {
+	width: 50px;
+	color: #fff;
+	font-size: 14px;
+}
+
+.audio-bar .audio-time-duration {
+	position: absolute;
+	right: 0;
+	text-align: center;
+}
+
+/*volume*/
+.audio .audio-volume {
+	width: 171px;
+	height: inherit;
+	margin: 0 4px;
+}
+
+.audio-volume .audio-volume-icon {
+	width: 40px;
+	padding-left: 15px;
+	box-sizing: border-box;
+	text-align: left;
+}
+.audio-volume .audio-volume-adjust {
+	position: relative;
+	width: 131px;
+	height: inherit;
+}
+
+.audio-volume-adjust > div, 
+.audio-volume-adjust > div div:first-child {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 110px;
+	height: 4px;
+	margin: -2px 0 0 -55px;
+	border-radius: 10px;
+	background: #171719;
+	overflow: visible;
+}
+
+.audio-progress > div div:first-child,
+.audio-volume-adjust > div div:first-child {
+	width: 0;
+	background: #B82525;
+}
+
+.audio-volume-adjust > div div:last-child {
+	position: absolute;
+	top: 50%;
+	left: -6px;
+	width: 12px;
+	height: 12px;
+	margin-top: -6px;
+	border-radius: 50%;
+	background: #B82525;
+	box-sizing: border-box;
+	border: 4px solid #fff;
+}
+
+.audio-progress > div div:last-child:hover,
+.audio-volume-adjust > div div:last-child:hover {
+	box-shadow: 0 0 8px rgba(255, 255, 255, .8);
+}

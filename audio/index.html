@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>AudioPlayer</title>
+	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="./css/audio.css">
+</head>
+<body>
+	<div id="wrapper"></div>
+	<script src="./js/audio.js"></script>
+	<script>
+		// 参数可有：preload、autoplay、preload、loop
+		// custom：自定义类、el：挂载点
+		audioPlayer.init({
+			el: 'wrapper',
+			src: ['./file/unravel.mp3', './file/远走高飞.mp3'],
+			preload: 'auto',
+			custom: 'MyAudio',
+			autoplay: true
+		});
+	</script>
+</body>
+</html>
