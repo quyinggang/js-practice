@@ -102,8 +102,7 @@
 			bgWidth = progressBg.offsetWidth,
 			percent = bgWidth / duration,
 			step = Math.floor(percent * currentTime),
-			left = progressBar.offsetLeft,
-			initLeft = Math.abs(left);
+			left = progressBar.offsetLeft;
 
 		// 是否播放完毕
 		if(!theAudio.ended) {
@@ -111,7 +110,7 @@
 			audioNodes.timeCurrent.innerText = audioData.currentTime;
 			step = step >= bgWidth ? bgWidth : step;
 			if (timer) {
-				left = left < 0 ? left + 2 : step - barWidth / 2;
+				left = left < 0 ? 0 : step - barWidth / 2;
 			} else {
 				left = step - barWidth / 2;
 			}
@@ -225,7 +224,7 @@
 			}
 		});
 
-		bgNode.parentNode.addEventListener('mouseup', function(e) {
+		document.addEventListener('mouseup', function(e) {
 			e.stopPropagation();
 			if (options.isDrag) {
 				tools.timeUpdateOrVolumeUpdate(options.offsetX, type);
@@ -484,9 +483,9 @@
 			e.stopPropagation();
 			clearInterval(timer);
 			theAudio.currentTime = audioData.durSeconds;
-			audioNodes.timeCurrent.innerText = audioData.duration;
+			timeCurrent.innerText = audioData.duration;
 			if (!settings.hasOwnProperty('loop') || !settings.loop) {
-				tools.changeIcon(audioNodes.stateINode, PAUSE);
+				tools.changeIcon(stateINode, PAUSE);
 			}
 			if (Array.isArray(settings.src)) {
 				let currentSrc = '',
@@ -502,6 +501,11 @@
 					audioData.currentSongIndex = 0;
 				}
 				theAudio.src = currentSrc;
+				tools.changeIcon(audioNodes.stateINode, PLAY);
+				timer = setInterval(() => {
+					audioData.timeSeconds = theAudio.currentTime;
+					tools.run(audioData.timeSeconds, audioData.durSeconds);
+				}, 900);
 				tools.play();
 			}
 		});
