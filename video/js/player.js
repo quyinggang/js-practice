@@ -524,7 +524,6 @@
 		theVideo.addEventListener('loadstart', function(e) {
 			e.stopPropagation();
 			timer = setInterval(() => {
-				console.log(progressBuffer.value);
 				tools.setBufferProgress(progressBuffer);
 				if (progressBuffer.value >= max) {
 					clearInterval(timer);
@@ -540,13 +539,14 @@
 
 		theVideo.addEventListener('stalled', function(e) {
 			e.stopPropagation();
-			if (isCanPlay) {
-				tools.addClass(playerVideo, classes.stalled);
-				tools.addClass(loading, classes.loading);
-			} else {
-				tools.addClass(playerVideo, classes.stalled);
-				tools.addClass(loading, classes.loading);
-			}
+			console.log('缓冲中');
+			// if (isCanPlay) {
+			// 	tools.addClass(playerVideo, classes.stalled);
+			// 	tools.addClass(loading, classes.loading);
+			// } else {
+			// 	tools.addClass(playerVideo, classes.stalled);
+			// 	tools.addClass(loading, classes.loading);
+			// }
 		});
 
 		// 视频结束
