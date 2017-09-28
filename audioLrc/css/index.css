@@ -1,0 +1,143 @@
+@charset 'utf-8';
+
+html,
+body,
+h4,
+section {
+	padding: 0;
+	margin: 0;
+}
+
+.on {
+	color: rgba(255, 255, 255, .8);
+}
+
+#audio-player {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 600px;
+	height: 360px;
+	margin: -180px  0 0 -300px;
+	vertical-align: middle;
+	background: #16181c;
+}
+
+#audio-player .audio-control,
+#audio-player .audio-detail {
+	display: inline-block;
+	position: relative;
+	width: 40%;
+	height: 90%;
+	color: #fff;
+	overflow: hidden;
+}
+
+.audio-control {
+	border-width: 30px 20px;
+	border-style: solid;
+	border-color: transparent;
+	box-sizing: border-box;
+}
+
+.audio-control span {
+	display: inline-block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 40px;
+	height: 40px;
+	margin: -20px 0 0 -20px;
+	line-height: 40px;
+	text-align: center;
+	background: rgba(22, 24, 28, .5);
+	border: 1px solid #c4c4c4;
+	border-radius: 50%;
+	box-sizing: border-box;
+	cursor: pointer;
+	transition: all 300ms linear;
+}
+
+.audio-control span.play {
+	top: 91%;
+	left: 90%;
+}
+
+.audio-control span i {
+	font-size: 20px;
+}
+
+.audio-control span:hover {
+	background: rgba(22, 24, 28, .8);
+	border-color: rgba(255, 255, 255, .9);
+}
+
+.audio-control img {
+	width: 100%;
+	height: 100%;
+}
+
+#audio-player .audio-detail {
+	width: 50%;
+	margin-left: 4%;
+}
+
+.audio-detail .info {
+	height: 20%;
+}
+
+.info h4 {
+	padding: 8px 0;
+}
+
+.info label {
+	color: gray;
+	font-size: 14px;
+}
+
+.info label:last-child {
+	display: inline-block;
+	width: 60%;
+	text-align: right;
+}
+
+.audio-detail .lyric {
+	font-size: 14px;
+	color: #5F5F63;
+	height: 80%;
+	border-right: 1px solid #2D2F32;
+	overflow: auto;
+}
+
+.lyric::-webkit-scrollbar {  
+    width: 8px;
+    background: #16181c;  
+ }
+
+/*定义滚动条轨道 内阴影+圆角*/  
+.lyric::-webkit-scrollbar-track {
+    background: transparent;  
+} 
+
+/*定义滑块 内阴影+圆角*/ 
+.lyric::-webkit-scrollbar-thumb {  
+    border-radius: 10px; 
+    background: #2D2F32;  
+} 
+
+.lyric::-webkit-scrollbar-thumb:hover {
+	background: rgba(147, 147, 140, .5);   
+} 
+
+#audio-player .control-bar {
+	width: 100%;
+}
+
+.control-bar audio {
+	width: 100%;
+	background: #232326;
+}
+
+.control-bar audio::-webkit-media-controls-panel {
+	background: transparent;
+}
