@@ -451,7 +451,7 @@
 	};
 
 	// 处理日期以及日期范围的输出
-	tools.handleExports = function(date, format, type,) {
+	tools.handleExports = function(date, format, type) {
 		let {year, month, day, hour, minutes, seconds} = tools.getYMD(date),
 			formatDate = null;
 
