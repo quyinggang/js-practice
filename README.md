@@ -13,7 +13,7 @@ JavaScript实践案例
 #### 日期控件
 [日期控件博客文章](http://blog.csdn.net/s1879046/article/details/78241980)
 实现效果：
-![日期选择](./date-s.png)
+![日期选择](./images/date-s.png)
 ![日期范围选择](./images/date-r.png)
 
 #### 视频播放器
