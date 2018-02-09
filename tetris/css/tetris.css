@@ -1,0 +1,179 @@
+html,
+body,
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+#tetric {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 604px;
+  margin: -302px 0 0 -300px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.screen,
+.info {
+  position: relative;
+  height: 100%;
+  float: left;
+}
+
+.screen {
+  width: 416px;
+  background: #a1ad87;
+  cursor: pointer;
+}
+
+.info {
+  width: 180px;
+  text-align: left;
+  padding-left: 20px;
+  background: rgba(221, 221, 221, .5);
+  box-sizing: border-box;
+}
+
+.screen .title {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 80px;
+  height: 40px;
+  line-height: 40px;
+  margin-left: -40px;
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, .3);
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.screen .over {
+  color: #000;
+  background: #fff;
+}
+
+.cell,
+.cell::before,
+.cell::after {
+  position: relative;
+  display: block;
+  width: 21px;
+  height: 21px;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.cell {
+  float: left;
+  margin: 2px 0 0 2px;
+}
+
+.cell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid #99a581;
+}
+
+.cell::after {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  top: 4px;
+  left: 4px;
+  background: #99a581;
+}
+
+.screen .on::before {
+  border-color: #000;
+}
+
+.screen .on::after {
+  background: #000;
+}
+
+.info .cell::before {
+  border-color: rgba(0, 0, 0, .2);
+}
+
+.info .cell::after {
+  background: rgba(0, 0, 0, .2);
+}
+
+.info .on::before {
+  border-color: #99a581;
+}
+
+.info .on::after {
+  background: #99a581;
+}
+
+.info .detail span {
+  display: block;
+}
+
+.info .detail-next {
+  position: relative;
+  height: 70px;
+}
+
+.info .detail p {
+  height: 23px;
+  margin: 0;
+  padding-left: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.info .detail-score,
+.info .detail-line,
+.info .detail-level {
+  color: #99A581;
+  text-align: center;
+}
+
+.info .operator {
+  position: relative;
+  height: 60px;
+}
+
+.info .operator .up,
+.info .operator .down,
+.info .operator .left,
+.info .operator .right {
+  position: absolute;
+}
+
+.info .operator .up {
+  top: 0;
+  left: 35%;
+}
+
+.info .operator .down {
+  bottom: 0;
+  left: 40%;
+}
+
+.info .operator .left {
+  top: 30%;
+  left: 15%;
+}
+
+.info .operator .right {
+  top: 30%;
+  right: 30%;
+}
