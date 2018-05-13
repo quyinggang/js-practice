@@ -1,0 +1,143 @@
+@charset 'utf-8';
+
+.btn {
+	display: block;
+	margin: 0;
+	padding: 12px 20px;
+	color: #606266;
+	text-align: center;
+	font-size: 14px;
+	font-weight: 500;
+	white-space: nowrap;
+	background: #fff;
+	border: 1px solid #dcdfe6;
+	border-radius: 4px;
+	box-sizing: border-box;
+	outline: 0;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+	transition: .1s;
+}
+
+.btn + .btn {
+	margin-left: 10px;
+}
+
+.btn:focus,
+.btn:hover {
+	color: #409EFF;
+	border-color: #c6e2ff;
+	background-color: #ecf5ff
+}
+
+.btn:active {
+	color: #3a8ee6;
+	border-color: #3a8ee6;
+}
+
+.btn__primary {
+	color: #fff;
+  background: #409eff;
+  border-color: #409eff;
+}
+
+.btn__primary:focus,
+.btn__primary:hover {
+	color: #fff;
+	background: #66b1ff;
+	border-color: #66b1ff;
+}
+.btn__primary:active {
+	background: #3a8ee6;
+	border-color: #3a8ee6;
+}
+
+
+.btn__success {
+	color:#fff;
+	background-color:#67c23a;
+	border-color:#67c23a
+}
+.btn__success:focus,
+.btn__success:hover {
+	background:#85ce61;
+	border-color:#85ce61;
+	color:#fff
+}
+.btn__success:active {
+	background:#5daf34;
+	border-color:#5daf34;
+	color:#fff
+}
+
+
+.btn__warning {
+	color: #fff;
+	background: #e6a23c;
+	border-color: #e6a23c
+}
+.btn__warning:focus,
+.btn__warning:hover {
+	background: #ebb563;
+	border-color: #ebb563;
+	color: #fff
+}
+.btn__warning:active {
+	background: #cf9236;
+	border-color: #cf9236;
+	color: #fff;
+}
+
+.btn__danger {
+	color: #fff;
+	background: #f56c6c;
+	border-color: #f56c6c
+}
+.btn__danger:focus,
+.btn__danger:hover {
+	background: #f78989;
+	border-color: #f78989;
+	color: #fff;
+}
+.btn__danger:active {
+	background: #dd6161;
+	border-color: #dd6161;
+	color: #fff;
+}
+
+.btn__info {
+	color: #fff;
+	background-color: #909399;
+	border-color: #909399;
+}
+.btn__info:focus,
+.btn__info:hover {
+	background: #a6a9ad;
+	border-color: #a6a9ad;
+	color: #fff;
+}
+.btn__info:active {
+	background: #82848a;
+	border-color: #82848a;
+	color: #fff;
+}
+
+.btn__text {
+	color: #409EFF;
+	background: transparent;
+	border-color: transparent;
+	padding-left: 0;
+	padding-right: 0;
+}
+.btn__text:focus,
+.btn__text:hover {
+	color: #66b1ff;
+	border-color: transparent;
+	background-color: transparent
+}
+.btn__text:active {
+	color: #3a8ee6;
+	background-color: transparent;
+}
+
