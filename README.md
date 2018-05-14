@@ -1,7 +1,29 @@
 
 ## js-practice
 JavaScript实践案例    
+
+#### UI
+
+> 该部分是阅读element ui源码，将基本的实现剥离出来以提供实现思路
+
+**button**
+
+![音乐播放控制条](./images/button.png)
+
+**switch**
+
+![切换按钮](/Users/quyinggang/github/js-practice/images/switch.png)
+
+**slider**
+
+![slider](/Users/quyinggang/github/js-practice/images/slider.png)
+
+**input**
+
+![input](/Users/quyinggang/github/js-practice/images/input.png)
+
 #### 音乐播放器
+
 [音乐播放博客文章](http://blog.csdn.net/s1879046/article/details/77898167)     
 实现效果：    
 ![音乐播放控制条](./images/audio.png)
