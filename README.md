@@ -26,7 +26,10 @@ JavaScript实践案例
 ![loading](./images/loading.png)     
 
 **radio**    
-![radio](./images/radio.png)      
+![radio](./images/radio.png)   
+
+**checkbox**   
+![checkbox](./images/checkbox.png)        
 
 #### 音乐播放器
 
