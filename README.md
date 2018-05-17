@@ -12,15 +12,18 @@ JavaScript实践案例
 
 **switch**
 
-![切换按钮](/Users/quyinggang/github/js-practice/images/switch.png)
+![切换按钮](./images/switch.png)
 
 **slider**
 
-![slider](/Users/quyinggang/github/js-practice/images/slider.png)
+![slider](./images/slider.png)
 
 **input**
 
-![input](/Users/quyinggang/github/js-practice/images/input.png)
+![input](./images/input.png)    
+
+**loading**     
+![loading](./images/loading.png)    
 
 #### 音乐播放器
 
