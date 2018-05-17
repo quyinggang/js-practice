@@ -23,7 +23,10 @@ JavaScript实践案例
 ![input](./images/input.png)    
 
 **loading**     
-![loading](./images/loading.png)    
+![loading](./images/loading.png)     
+
+**radio**    
+![radio](./images/radio.png)      
 
 #### 音乐播放器
 
