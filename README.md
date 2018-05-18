@@ -29,7 +29,10 @@ JavaScript实践案例
 ![radio](./images/radio.png)   
 
 **checkbox**   
-![checkbox](./images/checkbox.png)        
+![checkbox](./images/checkbox.png)   
+
+**rate**    
+![rate](./images/rate.png)           
 
 #### 音乐播放器
 
