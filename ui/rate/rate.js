@@ -8,41 +8,15 @@
     default: 'fa-star-o',
     active: 'fa-star'
   };
-
-  const forEach = function(items, cb) {
-    if (!items) return;
-    for (let item of items) {
-      cb(item);
-    }
-  };
-
-  const addClass = function(nodes, className) {
-    if (!nodes || !className) return;
-    const isArray = Array.isArray(nodes);
-    const _add = function(item) {
-      const currentName = item.className;
-      if (currentName.indexOf(className) >= 0) return;
-      item.className = `${currentName} ${className}`;
-    };
-    isArray ? forEach(nodes, _add) : _add(nodes);
-  };
-
-  const removeClass = function(nodes, className) {
-    if (!nodes || !className) return;
-    const isArray = Array.isArray(nodes);
-    const _remove = function(item) {
-      const currentName = item.className;
-      item.className = currentName.replace(className, '').trim();
-    };
-    isArray ? forEach(nodes, _remove) : _remove(nodes);
-  };
+  const removeClass = tools.removeClass;
+  const addClass = tools.addClass;
 
   const initEvents = function() {
     const icons = [];
-    forEach(nodes.iconItems, function(item) {
+    tools.forEach(nodes.iconItems, function(item) {
       icons.push(item.children[0]);
     });
-    forEach(nodes.iconItems, function(item) {
+    tools.forEach(nodes.iconItems, function(item) {
       const _getSelectIndex = function() {
         return Number(this.getAttribute('data-index'));
       };
@@ -56,7 +30,7 @@
         addClass(activeNodes, classes.active);
       };
       // 点击和移动，rate状态切换
-      on(item, {
+      tools.on(item, {
         'click': function(event) {
           event.stopPropagation();
           selectIndex = _getSelectIndex.call(this);
@@ -77,10 +51,8 @@
     });
   };
 
-  (function() {
-    const rate = document.querySelector('.rate');
-    nodes.rate = rate;
-    nodes.iconItems = rate.children;
-    initEvents();
-  })();
+  const rate = document.querySelector('.rate');
+  nodes.rate = rate;
+  nodes.iconItems = rate.children;
+  initEvents();
 })(window);

@@ -48,6 +48,9 @@
   left: 1px;
   border-radius: 100%;
   transition: all .3s;
-  
   background-color: #fff;
+}
+
+.switch__core-btn.is-checked {
+  transform: translate3d(20px, 0, 0);
 }

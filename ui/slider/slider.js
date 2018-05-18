@@ -17,6 +17,7 @@
 		thumbWrapper: null,
 		end: null
 	};
+	const on = tools.on;
 	
 	/**
 	 * 更新视图
@@ -88,14 +89,12 @@
 	/**
 	 * 获取相应的DOM节点
 	 */
-	(function() {
-		const slider = document.querySelector('.slider');
-		const content = slider.children[1];
-		nodes.start = slider.children[0];
-		nodes.runway = content;
-		nodes.progress = content.children[0];
-		nodes.thumbWrapper = content.children[1];
-		nodes.end = slider[2];
-		initEvents();
-	})();
+	const slider = document.querySelector('.slider');
+	const content = slider.children[1];
+	nodes.start = slider.children[0];
+	nodes.runway = content;
+	nodes.progress = content.children[0];
+	nodes.thumbWrapper = content.children[1];
+	nodes.end = slider[2];
+	initEvents();
 })(window);
