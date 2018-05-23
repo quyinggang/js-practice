@@ -32,7 +32,10 @@ JavaScript实践案例
 ![checkbox](./images/checkbox.png)   
 
 **rate**    
-![rate](./images/rate.png)           
+![rate](./images/rate.png)  
+
+**tooltip**      
+![tooltip](./images/tooltip.png)    
 
 #### 音乐播放器
 

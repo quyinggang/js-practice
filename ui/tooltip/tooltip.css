@@ -1,0 +1,28 @@
+@charset 'utf-8';
+
+.tooltip__poper {
+  display: block;
+  padding: 10px;
+  position: absolute;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 4px;
+  background: #303133;
+  z-index: 1000;
+  opacity: 0;
+  transition: .5s;
+}
+
+.tooltip__poper .arrow {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  bottom: -5px;
+  background: #303133;
+  transform: rotate(45deg);
+}
+
+.is-show {
+  opacity: 1;
+}
