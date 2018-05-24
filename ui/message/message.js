@@ -56,6 +56,14 @@
       this.msgNode.removeEventListener('transitionend', this.close);
     }
   };
+
+  const destory = function(msg) {
+    msg.msgNode.addEventListener('transitionend', () => {
+      msg.close();
+    });
+    removeClass(msg.msgNode, classes.isShow);
+  };
+
   /**
    * transitionend：
    *   判断CSS3 transition动画过渡结束事件
@@ -65,12 +73,18 @@
     on(btn, {
       'click': function(event) {
         event.stopPropagation();
-        const msg = new Msg({isClose: true});
-        setTimeout(function() {
-          msg.msgNode.addEventListener('transitionend', () => {
-            msg.close();
-          });
-          removeClass(msg.msgNode, classes.isShow);
+        let timer = null;
+        let msg = new Msg({isClose: true});
+        // 处理关闭
+        msg.isClose ? on(msg.closeNode, {
+          'click': function() {
+            clearTimeout(timer);
+            destory(msg);
+            msg = null;
+          }
+        }) : null;
+        timer = setTimeout(function() {
+          destory(msg);
           msg = null;
         }, msg.duration);
       }
