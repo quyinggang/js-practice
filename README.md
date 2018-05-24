@@ -35,7 +35,10 @@ JavaScript实践案例
 ![rate](./images/rate.png)  
 
 **tooltip**      
-![tooltip](./images/tooltip.png)    
+![tooltip](./images/tooltip.png)   
+
+**message**    
+![message](./images/message.png)   
 
 #### 音乐播放器
 
