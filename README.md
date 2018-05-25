@@ -43,7 +43,7 @@ JavaScript实践案例
 **tabs**    
 ![tabs](./images/tabs.png)    
 
-**collapse**
+**collapse**     
 ![collapse](./images/collapse.png)   
 
 #### 音乐播放器
