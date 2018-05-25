@@ -4,6 +4,7 @@
 	height: 20px;
 	line-height: 1;
 	cursor: pointer;
+	user-select: none;
 }
 
 .rate-item {

@@ -1,58 +1,93 @@
 ;(function(root) {
-  const nodes = {
-    rate: null,
-    iconItems: null
-  };
-  let selectIndex = null;
   const classes = {
     default: 'fa-star-o',
     active: 'fa-star'
   };
+  let rate = null;
+  let timer = null;
+  const on = tools.on;
   const removeClass = tools.removeClass;
   const addClass = tools.addClass;
 
-  const initEvents = function() {
-    const icons = [];
-    tools.forEach(nodes.iconItems, function(item) {
-      icons.push(item.children[0]);
-    });
-    tools.forEach(nodes.iconItems, function(item) {
-      const _getSelectIndex = function() {
-        return Number(this.getAttribute('data-index'));
-      };
-      const _set = function(index, isSelectIndex) {
-        const activeNodes = icons.slice(0, index);
-        const defaultNodes = icons.slice(index + 1);
-        // 移除所有选中状态，恢复默认状态，添加当前选中状态
-        removeClass(icons, classes.active);
-        addClass(icons, classes.default);
-        removeClass(activeNodes, classes.default);
-        addClass(activeNodes, classes.active);
-      };
-      // 点击和移动，rate状态切换
-      tools.on(item, {
+  const Rate = function(rate, items, selectIndex) {
+    this.items = items;
+    this.icons = null;
+    this.rate = rate;
+    this.selectIndex = selectIndex || 0;
+    this.init();
+  };
+
+  Rate.prototype = {
+    init: function() {
+      const rate = document.querySelector('.rate');
+      this.rate = rate;
+      this.items = [...rate.children].map(item => {
+        return new RateItem(item, false);
+      });
+      this.icons = this.items.map(item => {
+         return item.dom.children[0];
+      });
+      this.on();
+    },
+    on: function() {
+      const that = this;
+      on(this.rate, {
+        'mouseleave': function() {
+          const selectIndex = that.selectIndex;
+          const items = that.items.slice(selectIndex);
+          items.forEach(item => {
+            item.state = false;
+          });
+          _set(selectIndex);
+        }
+      });
+    }
+  };
+
+  const RateItem = function(dom, state) {
+    this.dom = dom;
+    this.state = state;
+    this.on();
+  };
+
+  RateItem.prototype = {
+    on: function() {
+      const that = this;
+      on(this.dom, {
         'click': function(event) {
           event.stopPropagation();
-          selectIndex = _getSelectIndex.call(this);
-          _set.call(this, selectIndex, true);
+          rate.selectIndex = _getSelectIndex.call(this);
+          that.state = true;
+          _set(rate.selectIndex);
         },
         'mousemove': function(event) {
           event.stopPropagation();
-          const index = _getSelectIndex.call(this);
-          _set.call(this, index);
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            const index = _getSelectIndex.call(this);
+            that.state = true;
+            _set(index);
+          }, 10);
         }
       });
-      // 处理离开容器前一次选择的结果
-      on(nodes.rate, {
-        'mouseleave': function() {
-          _set.call(icons[selectIndex], selectIndex);
-        }
-      });
-    });
+    },
+
   };
 
-  const rate = document.querySelector('.rate');
-  nodes.rate = rate;
-  nodes.iconItems = rate.children;
-  initEvents();
+  const _set = function(index) {
+    const icons = rate.icons;
+    const activeNodes = icons.slice(0, index);
+    const defaultNodes = icons.slice(index);
+    // 移除所有选中状态，恢复默认状态，添加当前选中状态
+    removeClass(icons, classes.active);
+    addClass(icons, classes.default);
+    removeClass(activeNodes, classes.default);
+    addClass(activeNodes, classes.active);
+  };
+
+  const _getSelectIndex = function() {
+    return Number(this.getAttribute('data-index'));
+  };
+
+  rate = new Rate();
 })(window);

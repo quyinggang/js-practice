@@ -12,7 +12,7 @@ body {
   overflow: hidden;
 }
 
-.collapse-item.is-active {
+.collapse-item:not(:last-child).is-active {
   border-bottom: 1px solid #ebeef5;
 }
 
@@ -59,7 +59,7 @@ body {
   position: relative;
   padding: 0 15px;
   box-sizing: border-box;
-  transition: height .6s, padding .4s;
+  transition: height .4s, padding .3s;
   overflow: hidden;
 }
 

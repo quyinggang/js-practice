@@ -2,26 +2,37 @@
   const classes = {
     isChecked: 'is-checked'
   };
-  const nodes = {
-    checkbox: null,
-    input: null
-  };
+  const on = tools.on;
   const addClass = tools.addClass;
   const removeClass = tools.removeClass;
 
-  const initEvents = function() {
-    tools.on(nodes.input, {
-      'click': function(event) {
-        const checkbox = nodes.checkbox;
-        this.checked ? addClass(checkbox, classes.isChecked) : 
-          removeClass(checkbox, classes.isChecked);
-      }
-    });
+  const Checkbox = function(checkboxBox, checkbox, checked) {
+    this.checked = checked;
+    this.checkbox = checkbox;
+    this.checkboxBox = checkboxBox;
+    this.init();
   };
 
-  const checkbox = document.querySelector('.checkbox');
-  const inner = checkbox.children[0].children;
-  nodes.checkbox = checkbox;
-  nodes.input = inner[1];
-  initEvents();
+  Checkbox.prototype = {
+    init: function() {
+      const that = this;
+      const checkboxBox = document.querySelector('.checkbox');
+      const inner = checkboxBox.children[0].children;
+      this.checkbox = inner[1];
+      this.checkboxBox = checkboxBox;
+      this.checked = this.checkbox.checked;
+      on(this.checkbox, {
+        'click': function() {
+          that.checked = !that.checked;
+          that.toggle();
+        }
+      });
+    },
+    toggle: function() {
+      const operatorClass = this.checked ? addClass : removeClass;
+      operatorClass(this.checkboxBox, classes.isChecked);
+    }
+  };
+
+  new Checkbox();
 })(window);

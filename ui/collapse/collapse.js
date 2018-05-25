@@ -6,16 +6,18 @@
   const addClass = tools.addClass;
   const removeClass = tools.removeClass;
 
-  const Collapse = function(items) {
-    this.items = items || [];
+  const Collapse = function() {
+    this.items = null;
     this.init();
   };
 
   Collapse.prototype = {
     init: function() {
-      const { items } = this;
-      items.forEach(item => {
-        console.log(item);
+      const collapse = document.querySelector('.collapse');
+      this.items = [...collapse.children].map(item => {
+        return new CollapseItem(item);
+      });
+      this.items.forEach(item => {
         item.panel.style.cssText = 'height:0';
         on(item.header, {
           click: function(event) {
@@ -51,12 +53,5 @@
     }
   };
 
-  const init = function() {
-    const collapse = document.querySelector('.collapse');
-    new Collapse([...collapse.children].map(item => {
-      return new CollapseItem(item);
-    }));
-  };
-
-  init();
+  new Collapse();
 })(window);
