@@ -4,7 +4,7 @@ JavaScript实践案例
 
 #### UI
 
-> 该部分是结合阅读element ui源码实现思路，使用JS实现核心的功能以及相应的样式，有的并不会与其完全相同，也会参考其他源码的实现
+> 该部分是主要结合阅读element ui源码实现，使用JS实现核心的功能以及相应的样式（并不完全实现所有功能），旨在低学习成本阐述相应的实现思路
 
 **button**
 
@@ -39,6 +39,12 @@ JavaScript实践案例
 
 **message**    
 ![message](./images/message.png)   
+
+**tabs**    
+![tabs](./images/tabs.png)    
+
+**collapse**
+![collapse](./images/collapse.png)   
 
 #### 音乐播放器
 
