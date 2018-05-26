@@ -1,36 +1,48 @@
 ;(function(root) {
-	let isChecked = false;
-	const nodes = {
-		switch: null,
-		checkBox: null,
-		switchCore: null,
-		switchBtn: null
-	};
 	const classes = {
 		isChecked: 'is-checked'
 	};
 	const addClass = tools.addClass;
 	const removeClass = tools.removeClass;
+	const on = tools.on;
 
-	const initEvents = function() {
-		const btn = nodes.switchBtn;
-		const sw = nodes.switch;
-		tools.on(nodes.switchCore, {
-			'click': function() {
-				isChecked = !nodes.checkBox.checked;
-				nodes.checkBox.checked = isChecked;
-				const temp = [btn, sw];
-				isChecked ? addClass(temp, classes.isChecked) : 
-					removeClass(temp, classes.isChecked);
-				console.log(isChecked);
-			}
-		})
+	const Switch = function(checked) {
+		this.checked = checked || false;
+		this.dom = {
+			switch: null,
+			checkBox: null,
+			switchCore: null,
+			switchBtn: null
+		};
+		this.init();
 	};
 
-	const sw = document.querySelector('.switch');
-	nodes.switch = sw;
-	nodes.checkBox = sw.children[0];
-	nodes.switchCore = sw.children[1];
-	nodes.switchBtn = sw.children[1].children[0];
-	initEvents();
+	Switch.prototype = {
+		init: function() {
+			const { dom } = this;
+			const sw = document.querySelector('.switch');
+			dom.switch = sw;
+			dom.checkBox = sw.children[0];
+			dom.switchCore = sw.children[1];
+			dom.switchBtn = sw.children[1].children[0];
+			this.on();
+		},
+		on: function() {
+			const { switchBtn, switch: sw, switchCore, 
+				checkBox } = this.dom;
+			on(switchCore, {
+				'click': function() {
+					isChecked = !checkBox.checked;
+					this.checked = isChecked;
+					checkBox.checked = isChecked;
+					const temp = [switchBtn, sw];
+					isChecked ? addClass(temp, classes.isChecked) : 
+						removeClass(temp, classes.isChecked);
+					console.log(isChecked);
+				}
+			});
+		}
+	};
+
+	new Switch();
 })(window);
