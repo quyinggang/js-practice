@@ -1,0 +1,33 @@
+@charset 'utf-8';
+
+.badge {
+  position: relative;
+}
+
+.badge .badge-content {
+  height: 18px;
+  line-height: 18px;
+  padding: 0 6px;
+  position: absolute;
+  top: -9px;
+  right: -18px;
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  text-align: center;
+  background: #f56c6c;
+  border-radius: 10px;
+  border: 1px solid #fff;
+}
+
+.is-dot .badge-content {
+  width: 10px;
+  height: 10px;
+  line-height: 0;
+  padding: 0;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #f56c6c;
+  border-radius: 50%;
+}
