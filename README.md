@@ -49,6 +49,9 @@ JavaScript实践案例
 **badge**     
 ![badge](./images/badge.png)    
 
+**carousel**   
+![carousel](./images/carousel.png)   
+
 #### 音乐播放器
 
 [音乐播放博客文章](http://blog.csdn.net/s1879046/article/details/77898167)     

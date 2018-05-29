@@ -1,0 +1,136 @@
+@charset 'utf-8';
+
+.carousel {
+  position: relative;
+  width: 600px;
+  overflow-x: hidden;
+}
+
+
+.carousel .carousel-container {
+  position: relative;
+  height: 300px;
+}
+
+.carousel__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #ddd;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.carousel__item:nth-of-type(2n) {
+  background: #99a9bf;
+}
+
+.carousel__item.is-animating {
+  transition: transform .4s ease-in-out;
+}
+
+.carousel__item h2 {
+  line-height: 300px;
+}
+
+.carousel .carousel__arrow {
+  display: block;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  top: 50%;
+  margin-top: -18px;
+  background: rgba(31,45,61,.11);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: .4s, opacity .3s;
+  opacity: 0;
+  z-index: 10;
+}
+
+
+.carousel .carousel__arrow:hover {
+  background: rgba(31,45,61,.23);
+}
+
+
+.carousel .carousel__arrow.left {
+  left: -32px;
+}
+
+.carousel .carousel__arrow.right {
+  right: -32px;
+}
+
+.carousel:hover .carousel__arrow.left {
+  left: 16px;
+  opacity: 1;
+}
+
+.carousel:hover .carousel__arrow.right {
+  right: 16px;
+  opacity: 1;
+}
+
+
+.carousel__arrow::after {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -4px 0 0 -6px;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.carousel__arrow.left::after {
+  margin-left: -4px;
+  transform: rotate(135deg);
+}
+
+.carousel__arrow.right::after {
+  transform: rotate(-45deg);
+}
+
+.carousel .carousel-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+.carousel-indicator {
+  display: inline-block;
+  width: 30px;
+  height: 20px;
+  position: relative;
+  cursor: pointer;
+}
+
+.carousel-indicator .bar {
+  display: block;
+  width: 80%;
+  height: 2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #d3dce6;
+  transition: background-color .2s ease-in-out;
+}
+
+.carousel-indicator:hover .bar,
+.carousel-indicator.is-active .bar {
+  background: rgba(0,0,0,.5);
+}
