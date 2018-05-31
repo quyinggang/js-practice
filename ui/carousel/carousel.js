@@ -27,6 +27,59 @@
     return index;
   };
 
+  /**
+   * 函数节流和去抖
+   * @param  {[type]}   delay        延时
+   * @param  {[type]}   noTrailing   最后一次是否调用callback， true不执行
+   * @param  {Function} callback     回调函数
+   * @param  {[type]}   debounceMode 模式：false -> throttle true -> debounce
+   *
+   * throttle-debounce源码
+   * 分为如下几种情况：
+   * - 300 true cb true => exec，没有节流效果
+   * - 300 true cb => 只执行elapsed > delay部分
+   * - 300 false cb => 如上, 如果elpsed < delay 会执行timeoutID设置部分
+   * - 300 false cb true => exec、timeoutID部分
+   */
+  const throttle = function(delay, noTrailing, callback, debounceMode) {
+    // 定时器ID
+    var timeoutID;
+    // 上一次执行函数的时间
+    var lastExec = 0;
+    function wrapper () {
+      var self = this;
+      // 计算当前触发与上一次执行函数之间时间间隔
+      var elapsed = Number(new Date()) - lastExec;
+      var args = arguments;
+
+      // 执行函数并设置触发时间为当前时间
+      function exec () {
+        lastExec = Number(new Date());
+        callback.apply(self, args);
+      }
+
+      function clear () {
+        timeoutID = undefined;
+      }
+
+      // debounce时，第一次主动触发
+      if ( debounceMode && !timeoutID ) {
+        exec();
+      }
+
+      // 清除当前定时器
+      if ( timeoutID ) {
+        clearTimeout(timeoutID);
+       }
+      if ( debounceMode === undefined && elapsed > delay ) {
+        exec();
+      } else if ( noTrailing !== true ) {
+        timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+      }
+    }
+    return wrapper;
+  };
+
   const Carousel = function(autoPlay) {
     this.dom = null;
     this.items = null;
@@ -64,20 +117,17 @@
     },
     on: function() {
       const that = this;
+      const _traggle = throttle(300, true, type => {
+        type === 'left' ? that.prev() : that.next();
+      });
       on(this.leftDom, {
         'click': function() {
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            that.prev();
-          }, 180);
+          _traggle('left');
         }
       });
       on(this.rightDom, {
         'click': function() {
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            that.next();
-          }, 180);
+          _traggle('right');
         }
       });
     },
