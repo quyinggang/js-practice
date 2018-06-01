@@ -50,7 +50,10 @@ JavaScript实践案例
 ![badge](./images/badge.png)    
 
 **carousel**   
-![carousel](./images/carousel.png)   
+![carousel](./images/carousel.png)  
+
+**scrollbar**    
+![scrollbar](./images/scrollbar.png)    
 
 #### 音乐播放器
 

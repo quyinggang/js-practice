@@ -52,6 +52,7 @@
 	text-align: center;
 	line-height: normal;
 	z-index: 1001;
+	/*这里保证了滑块两端结束都是thumb中心位置*/
 	-webkit-transform: translateX(-50%);
 	transform: translateX(-50%);
 	background-color: transparent;

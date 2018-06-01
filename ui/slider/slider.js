@@ -28,6 +28,7 @@
 			dom.start = slider.children[0];
 			dom.runway = content;
 			dom.progress = content.children[0];
+			// wrap区域
 			thumb.dom = content.children[1];
 			dom.end = slider[2];
 			this.on();
