@@ -53,9 +53,9 @@ JavaScript实践案例
 ![carousel](./images/carousel.png)  
 
 **scrollbar**    
-![scrollbar](./images/scrollbar.png)   
+![scrollbar](./images/scrollbar.png)      
 
-**select**
+**select**    
 ![select](./images/select.png)     
 
 #### 音乐播放器
