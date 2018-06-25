@@ -24,13 +24,13 @@
 	background: #222225;
 }
 
-.audio * {
-	display: inline-block;
+.audio span,
+.audio > div {
+	overflow: hidden;
 }
 
-.audio span, 
-.audio div {
-	overflow: hidden;
+.audio * {
+	display: inline-block;
 }
 
 .audio span {
@@ -45,7 +45,7 @@
 	cursor: pointer;
 }
 
-.audio-progress div, 
+.audio-progress .slider-runway, 
 .audio-volume-adjust div {
 	cursor: pointer;
 }
@@ -71,8 +71,7 @@
 	height: inherit;
 }
 
-.audio-progress > div, 
-.audio-progress > div div:first-child {
+.audio-progress .slider-runway {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -81,22 +80,36 @@
 	margin: -3px 0 0 -260px;
 	border-radius: 5px;
 	background: #171719;
-	overflow: visible;
 }
 
-.audio-progress > div div:last-child {
+.slider-runway .slider-progress {
+	position: absolute;
+	width: 0;
+	height: 100%;
+	background: #B82525;
+}
+
+.slider-runway .thumb-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 26px;
+	height: 26px;
 	position: absolute;
 	top: 50%;
-	left: -7px;
-	width: 14px;
-	height: 14px;
-	margin-top: -7px;
-	border-radius: 50%;
-	background: #B82525;
-	box-sizing: border-box;
-	border: 5px solid #fff;
+	margin-top: -13px;
+	transform: translateX(-50%);
+	z-index: 2000;
 }
 
+.thumb-wrapper .thumb {
+	width: 16px;
+	height: 16px;
+	background: #B82525;
+	border: 6px solid #fff;
+	border-radius: 50%;
+	box-sizing: border-box;
+}
 .audio-bar span {
 	width: 50px;
 	color: #fff;
@@ -141,7 +154,6 @@
 	overflow: visible;
 }
 
-.audio-progress > div div:first-child,
 .audio-volume-adjust > div div:first-child {
 	width: 0;
 	background: #B82525;
@@ -160,7 +172,6 @@
 	border: 4px solid #fff;
 }
 
-.audio-progress > div div:last-child:hover,
 .audio-volume-adjust > div div:last-child:hover {
 	box-shadow: 0 0 8px rgba(255, 255, 255, .8);
 }

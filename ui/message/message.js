@@ -52,7 +52,7 @@
       }, 30);
     },
     close: function() {
-      body.removeChild(this.msgNode);
+      if (body.contains(this.msgNode)) body.removeChild(this.msgNode);
       this.msgNode.removeEventListener('transitionend', this.close);
     }
   };

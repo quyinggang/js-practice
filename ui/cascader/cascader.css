@@ -1,1 +1,112 @@
 @charset 'utf-8';
+
+.cascader {
+  position: relative;
+  cursor: pointer;
+}
+
+.cascader .input {
+  display: inline-block;
+  width: 240px;
+  position: relative;
+}
+.cascader .input__inner {
+  padding: 0 30px 0 15px;
+  cursor: pointer;
+}
+
+.cascader .input__suffix {
+  display: block;
+  width: 25px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 5px;
+  overflow: hidden;
+}
+
+.cascader .input__suffix::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border-left: 1px solid #c0c4cc;
+  border-bottom: 1px solid #c0c4cc;
+  transform: rotate(-45deg);
+  transition: transform .3s;
+}
+
+.is-focus .input__suffix::after {
+  transform: rotate(-225deg);
+}
+
+.cascader-dropdown {
+  margin: 5px 0;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  box-sizing: border-box;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform .3s cubic-bezier(0.23,1,0.32,1),
+              opacity .3s cubic-bezier(0.23,1,0.32,1);
+}
+
+.cascader-dropdown .scrollbar__view {
+  list-style-type: none;
+}
+
+.cascader-dropdown__list {
+  margin: 0;
+  padding: 0;
+  padding: 20px 0;
+  list-style: none;
+  user-select: none;
+}
+
+.cascader-dropdown .item {
+  height: 34px;
+  line-height: 34px;
+  padding: 0 20px;
+  color: #606266;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.cascader-dropdown .item:hover {
+  background: #f5f7fa;
+}
+
+.cascader-dropdown .active {
+  color: #409eff;
+}
+
+
+.cascader-dropdown .arrow {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  top: -6px;
+  left: 35px;
+  background: #fff;
+  border-top: 1px solid #ebeef5;
+  border-left: 1px solid #ebeef5;
+  transform: rotate(45deg);
+}
+
+.is-dropdown {
+  opacity: 1;
+  transform: scaleY(1);
+}

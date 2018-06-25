@@ -1,1 +1,38 @@
 @charset 'utf-8';
+
+.notification {
+  display: flex;
+  align-items: center;
+  width: 330px;
+  position: fixed;
+  top: 20px;
+  right: 0;
+  padding: 15px 15px 15px 20px;
+  color: #909399;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  opacity: 0;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  transform: translateX(100%);
+  transition: opacity .3s, transform .3s, right .3s, top .3s;
+}
+
+.notification .notification__content {
+  padding: 0 0 0 10px;
+  margin: 0;
+}
+
+.notification .notification__close {
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+}
+
+.is-show {
+  right: 16px;
+  opacity: 1;
+  transform: translateX(0);
+}

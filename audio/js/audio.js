@@ -183,6 +183,56 @@
 	};
 
 	// 滑动效果
+	// tools.drag = function(bar, bgNode, fgNode, type) {
+	// 	if (!bar.nodeName || !bgNode.nodeName || !fgNode) {
+	// 		return;
+	// 	}
+
+	// 	let options = {
+	// 		clientX: 0,
+	// 		left: 0,
+	// 		max: 0,
+	// 		isDrag: false,
+	// 		offsetX: 0
+	// 	};
+	// 	// 滑动效果
+	// 	bar.addEventListener('mousedown', function(e) {
+	// 		e.stopPropagation();
+	// 		options.clientX = e.clientX;
+	// 		options.left = this.offsetLeft;
+	// 		options.max = bgNode.offsetWidth - this.offsetWidth / 2;
+	// 		options.isDrag = true;
+	// 	});
+
+	// 	document.addEventListener('mousemove', function(e) {
+	// 		e.stopPropagation();
+	// 		if (options.isDrag) {
+	// 			let currentClientX = e.clientX,
+	// 				left = options.left,
+	// 				max = options.max,
+	// 				initClientX = options.clientX,
+	// 				barHalfWidth = bar.offsetWidth / 2,
+	// 				fgWidth = 0,
+	// 				to = Math.max(0, Math.min(max, left + (currentClientX - initClientX)));
+
+	// 			bar.style.left = to + 'px';
+	// 			if (to > barHalfWidth) {
+	// 				fgWidth = to + barHalfWidth;
+	// 			}
+	// 			fgNode.style.width = Math.max(0, fgWidth) + 'px';
+	// 			options.offsetX = Math.max(0, fgWidth);
+	// 		}
+	// 	});
+
+	// 	document.addEventListener('mouseup', function(e) {
+	// 		e.stopPropagation();
+	// 		if (options.isDrag) {
+	// 			tools.timeUpdateOrVolumeUpdate(options.offsetX, type);
+	// 			options.isDrag = false;
+	// 		}
+	// 	});
+	// };
+
 	tools.drag = function(bar, bgNode, fgNode, type) {
 		if (!bar.nodeName || !bgNode.nodeName || !fgNode) {
 			return;
@@ -232,6 +282,7 @@
 			}
 		});
 	};
+
 
 	// 进度条以及音量调节
 	tools.timeUpdateOrVolumeUpdate = function(offsetX, type) {
@@ -298,10 +349,10 @@
 	* </div>
 	*/
 	tools.view = function(el) {
-		let [[audio, controller, bar, progress, progressBg, progressFg, progressBar, volume, volumeAdjust,
+		let [[audio, controller, bar, thumb, progress, progressBg, progressFg, progressBar, volume, volumeAdjust,
 			  volumeAdjustBg, volumeAdjustFg, volumeAdjustBar],
 			[prev, state, next, timeCurrent, timeDuration, volumeIcon], [prevINode, stateINode, 
-			nextINode, volumeINode]] = tools.create(['div*12', 'span*6', 'i*4']),
+			nextINode, volumeINode]] = tools.create(['div*13', 'span*6', 'i*4']),
 			mainClass = 'audio',
 			legalRegex = /^[a-zA-Z]+[^\u4e00-\u9fa5]+/g;
 
@@ -367,15 +418,21 @@
 								children: [
 									{
 										node: progressBg,
-										class: '',
+										class: 'slider-runway',
 										children: [
 											{
 												node: progressFg,
-												class: ''
+												class: 'slider-progress',
 											},
 											{
 												node: progressBar,
-												class: ''
+												class: 'thumb-wrapper',
+												children: [
+													{
+														node: thumb,
+														class: 'thumb'
+													}
+												]
 											}
 										]
 									}
@@ -616,8 +673,7 @@
 					}
 				}
 			}
-		});
-			
+		});	
 	};
 
 	// 构建audio节点

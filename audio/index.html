@@ -7,17 +7,36 @@
 	<link rel="stylesheet" type="text/css" href="./css/audio.css">
 </head>
 <body>
-	<div id="wrapper"></div>
-	<script src="./js/audio.js"></script>
-	<script>
-		// 参数可有：preload、autoplay、preload、loop
-		// custom：自定义类、el：挂载点
-		audioPlayer.init({
-			el: 'wrapper',
-			src: ['./file/unravel.mp3', './file/远走高飞.mp3'],
-			preload: 'auto',
-			custom: 'MyAudio'
-		});
-	</script>
+	<div class="audio">
+	 	<div class="audio-controller">
+	 		<span class="prev"></span>
+	 		<span class="state"></span>
+	 		<span class="next"></span>
+	 	</div>
+ 		<div class="audio-bar">
+ 			<span class="audio-time-current"></span>
+ 			<div class="audio-progress">
+ 				<div class="slider-runway">
+ 					<div class="slider-progress"></div>
+ 					<div class="thumb-wrapper">
+ 						<div class="thumb"></div>
+ 					</div>
+ 				</div>
+ 			</div>
+ 			</div>
+ 			<span class="audio-time-duration"></span>
+ 		</div>
+ 		<div class="audio-volume">
+ 			<span class="audio-volume-icon"></span>
+ 			<div class="audio-volume-adjust">
+ 				<div class="slider-runway">
+ 					<div class="slider-progress"></div>
+ 					<div class="thumb-wrapper">
+ 						<div class="thumb"></div>
+ 					</div>
+ 				</div>
+ 			</div>
+ 		</div>
+	<script src="./js/reaudio.js"></script>
 </body>
 </html>

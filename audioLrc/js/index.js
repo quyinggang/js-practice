@@ -251,8 +251,6 @@
 					currentLine = lyricLines[index];
 					lyric.scrollTop = currentLine.offsetTop - lyricOffsetTop - currentLine.offsetHeight * 8;
 					tools.addClass(currentLine, classes.on);
-					// timestamps.splice(index, 1);
-					// lyricLines.splice(index, 1);
 					return;
 				}
 			});

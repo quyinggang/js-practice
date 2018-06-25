@@ -54,9 +54,11 @@ JavaScript实践案例
 
 **scrollbar**    
 ![scrollbar](./images/scrollbar.png)      
-
 **select**    
-![select](./images/select.png)     
+![select](./images/select.png)   
+
+**Notification**   
+![notice](./images/notice.png)    
 
 #### 音乐播放器
 
