@@ -58,7 +58,10 @@ JavaScript实践案例
 ![select](./images/select.png)   
 
 **Notification**   
-![notice](./images/notice.png)    
+![notice](./images/notice.png)  
+
+**MessageBox**   
+![messageBox](./images/messageBox.png)     
 
 #### 音乐播放器
 
