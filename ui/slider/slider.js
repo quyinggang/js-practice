@@ -32,16 +32,16 @@
 			thumb.dom = content.children[1];
 			dom.end = slider[2];
 			this.on();
+			thumb.on();
 		},
 		on: function() {
 			const that = this;
 			const { runway } = this.dom;
-			this.thumb.on();
 			on(runway, {
 				'click': function(event) {
 					const contentBox = runway.getBoundingClientRect();
 					const percent = (event.clientX - contentBox.left) / contentBox.width * 100;
-					currentPosition = Math.max(0, Math.min(percent, 100));
+					that.thumb.currentPosition = Math.max(0, Math.min(percent, 100));
 					that.updateView(); 
 				}
 			});
@@ -82,10 +82,10 @@
 			const that = this;
 			on(this.dom, {
 				'mousedown': function(event) {
-					event.preventDefault();
+					event.stopPropagation();
 					that.dragStart(event);
-					addEventListener('mousemove', function() {
-						that.dragging();
+					addEventListener('mousemove', function(e) {
+						that.dragging(e);
 					});
 					addEventListener('mouseup', function() {
 						that.dragEnd();
@@ -96,9 +96,9 @@
 		dragStart: function(event) {
 			this.isDragging = true;
 			this.startX = event.clientX;
-			this.startPosition = this.currentPosition
+			this.startPosition = this.currentPosition;
 		},
-		dragging: function() {
+		dragging: function(event) {
 			if (!this.isDragging) return;
 			slider.setPosition(event.clientX);
 		},

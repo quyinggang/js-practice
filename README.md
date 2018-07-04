@@ -61,7 +61,10 @@ JavaScript实践案例
 ![notice](./images/notice.png)  
 
 **MessageBox**   
-![messageBox](./images/messageBox.png)     
+![messageBox](./images/messageBox.png)  
+
+**Color-Picker**    
+![colorPicker](./images/colorPicker.png)     
 
 #### 音乐播放器
 

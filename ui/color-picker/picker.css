@@ -1,0 +1,174 @@
+@charset 'utf-8';
+
+.color-picker {
+	display: inline-block;
+	position: relative;
+	width: 40px;
+	height: 40px;
+	border-radius: 4px;
+}
+
+.color-picker__trigger {
+	display: block;
+  height: 40px;
+  width: 40px;
+  position: relative;
+  padding: 4px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.color-picker__trigger .color {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  text-align: center;
+  box-sizing: border-box;
+  border: 1px solid #999;
+  border-radius: 2px;
+}
+
+.icon-close {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -6px 0 0 -6px;
+}
+
+.icon-close::before,
+.icon-close::after {
+	display: inline-block;
+	content: " ";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 1px;
+	height: 10px;
+	margin: -5px 0 0 -.5px;
+	background: #999;
+	transform: rotateZ(45deg);
+}
+
+.icon-close::after {
+	transform: rotateZ(-45deg);
+}
+
+
+.color-picker__panel.is-open {
+  display: block;
+}
+
+.color-picker__panel {
+  display: none;
+  position: absolute;
+  padding: 6px;
+  box-sizing: content-box;
+  background-color: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  z-index: 2001;
+  user-select: none;
+}
+
+.main .color-panel {
+  display: inline-block;
+  width: 280px;
+  height: 180px;
+  position: relative;
+}
+
+.color-panel .panel__white,
+.color-panel .panel__black {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.color-panel .panel__white {
+  background: linear-gradient(to right, #fff, rgba(255,255,255,0));
+}
+.color-panel .panel__black {
+  background: linear-gradient(to top, #000, transparent);
+}
+
+.main .color-slider {
+  display: inline-block;
+  width: 12px;
+  height: 180px;
+  margin-left: 5px;
+  position: relative;
+}
+
+/*
+  颜色选择滑块背景
+  主要就是background的设置
+ */
+.color-slider .slider__bar {
+  height: 100%;
+  background: linear-gradient(to bottom, red 0, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, red 100%);
+}
+
+.slider__thumb-wrapper {
+  position: absolute;
+  z-index: 2002;
+  cursor: pointer;
+}
+
+.slider__thumb-wrapper .thumb {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 0 1px rgba(0,0,0,.6);
+  box-sizing: border-box;
+}
+
+.color-slider .slider__thumb-wrapper {
+  width: 100%;
+  height: 10px;
+  top: 0;
+  transform: translateY(-50%);
+}
+
+.color-slider .slider__thumb-wrapper .thumb {
+  width: 100%;
+  height: 4px;
+  top: 50%;
+  margin-top: -2px;
+}
+
+.alpha-slider {
+  position: relative;
+  width: 280px;
+  height: 12px;
+  margin: 10px 0;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+}
+
+.alpha-slider .slider__bar {
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0, #fff 100%);
+}
+
+.alpha-slider .slider__thumb-wrapper {
+  width: 12px;
+  height: 100%;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+.alpha-slider .slider__thumb-wrapper .thumb {
+  width: 4px;
+  height: 100%;
+  left: 50%;
+  margin-left: -2px;
+}
