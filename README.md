@@ -64,7 +64,11 @@ JavaScript实践案例
 ![messageBox](./images/messageBox.png)  
 
 **Color-Picker**    
-![colorPicker](./images/colorPicker.png)     
+![colorPicker](./images/colorPicker.png)    
+
+**Upload**    
+> 上传进度以及上传之后查看删除都没有在页面体现，你可以通过控制台查看上传进度
+![upload](./images/upload.png)         
 
 #### 音乐播放器
 

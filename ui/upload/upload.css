@@ -1,0 +1,40 @@
+
+.upload .upload-input {
+  width: 148px;
+  height: 148px;
+  line-height: 148px;
+  text-align: center;
+  background-color: #fbfdff;
+  border: 1px dashed #c0ccda;
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.upload-input .upload-input__inner {
+  display: none;
+}
+
+.upload .upload-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1em;
+}
+
+.upload .upload-list .item {
+  overflow: hidden;
+  background-color: #fff;
+  border: 1px solid #c0ccda;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
+  display: inline-block;
+}
+
+.upload-list .item .img {
+  width: 100%;
+  height: 100%;
+}
