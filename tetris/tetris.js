@@ -580,6 +580,5 @@
     });
   };
 
-  const tetris = new Tetris();
-  tetris.init();
+  new Tetris().init();
 } )(window);

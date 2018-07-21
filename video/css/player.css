@@ -1,330 +1,139 @@
-@charset 'utf-8';
-
 html,
-body,
-input,
-video {
+body {
+	display: relative;
 	padding: 0;
 	margin: 0;
 }
 
-html,
-body {
-	width: 100%;
-	height: 100%;
-}
-
-video {
-	display: block;
-}
-
-.player-video {
-	position: relative;
-	width: 800px;
-	min-width: 400px;
-	margin: auto;
-}
-
-/**
- * 重置input[type='range']的默认样式
- */
-.player-video input[type="range"] {
-    background: transparent;
-    border: 0;
-    border-color: transparent;
-    -webkit-appearance: none;
-    cursor: pointer;
-    outline: none;
-    outline-color: transparent;
-}
-
-
-.player-video input[type="range"]::-webkit-slider-runnable-track {
-    height: 5px;
-    outline: none;
-}
-
-
-.player-video input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 15px;
-    width: 15px;
-    background: #B82525; 
-    border-radius: 50%;
-    border: 5px solid #fff;
-    margin-top: -5px;
-}
-
-.player-video input[type="range"]::focus {
-	outline: none;
-}
-
-/**
- * 改变progress默认样式
- */
-.player-video progress {
-	color: #B82525;
-	border: 0;
-}
-
-.player-video progress::-webkit-progress-bar {
-	background: transparent;
-}
-
-.player-video progress::-webkit-progress-value {
-	background: #B82525;
-}
-
-.volume progress::-webkit-progress-bar {
-	background: #6c6c6c;
-}
-
-.player-video progress.progress-buffer {
-	color: #6c6c6c;
-	z-index: 1;
-}
-
-.player-video progress.progress-buffer::-webkit-progress-value {
-	background: #6c6c6c;
-}
-
-.player-video-wrapper {
-	position: relative;
-}
-
-.player-video-wrapper .video-box {
+#player {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-}
-
-.player-video-wrapper video {
-	width: 100%;
-	height: 100%;
-	background: #000;
-}
-
-.player-controller {
-	display: table;
-	position: relative;
-	height: 42px;
-	width: 100%;
-	padding-top: 5px;
-	box-sizing: border-box;
-	background: #111;
+	width: 800px;
+	height: 450px;
+	transform: translate(-50%, -50%);
 	user-select: none;
 }
 
-.player-progress {
-	position: absolute;
-	top: 0;
+#player .video {
 	width: 100%;
+	height: 100%;
 }
 
-.player-progress input,
-.player-progress progress {
-	position: absolute;
-	top: 0;
+.slider {
 	width: 100%;
-	height: 5px;
-	z-index: 2;
-}
-
-.player-controller-left,
-.player-controller-right {
-	display: table-cell;
-	font-size: 12px;
-	color: #fff;
-	width: 50%;
-	height: 37px;
-	vertical-align: middle;
-	overflow: hidden;
-}
-
-.player-controlller-right {
-	text-align: right;
-}
-
-.player-controller-left span,
-.player-controller-right span {
-	display: inline-block;
-	width: 60px;
-	text-align: center;
-}
-
-.player-controller-left i,
-.player-controller-right i {
-	font-size: 18px;
+	height: 4px;
+	background: rgba(255, 255, 255, .3);
 	cursor: pointer;
 }
 
-
-.player-controller-left span:not(.icon) {
-	width: auto;
+.slider .slider-progress,
+.slider .slider-progress .slider-buffer {
+	height: 100%;
+	width: 0;
 }
 
-.player-controller-left span:nth-of-type(3) {
+.slider .slider-progress {
+	background: #B82525;
+}
+
+.slider .slider-runway {
+	position: absolute;
+	top: -6px;
 	width: 16px;
-	font-size: 13px;
-	text-align: center;
-}
-
-.player-controller-right {
-	position: relative;
-}
-
-.player-controller-right span:first-child {
-	position: absolute;
-	right: 178px;
-	width: 50px;
-	color: #A5A7A8;
-	text-align: right;
-}
-
-.player-controller-right span:first-child:hover {
-	color: #fff;
-}
-
-.player-controller-right span:last-child {
-	float: right;
-	width: 50px;
-	text-align: center;
-}
-
-.player-controller-right div.volume {
-	display: inline-block;
-	position: absolute;
-	top: 50%;
-	right: 80px;
-	width: 100px;
-	padding-left: 8px;
-	box-sizing: border-box;
-}
-
-.player-controller-right input,
-.player-controller-right progress {
-	position: absolute;
-	top: 50%;
-	width: 100%;
-	height: 3px;
-	margin-top: -1.5px;
+	height: 16px;
+	transform: translateX(-2px);
+	cursor: pointer;
 	z-index: 2;
 }
 
-.player-progress input,
-.player-controller-right input {
-	z-index: 3;
-	background: transparent;
+.slider .slider-runway .thumb {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 14px;
+	height: 14px;
+	margin: -7px 0 0 -7px;
+	border-radius: 50%;
+	border: 4px solid #fff;
+	box-sizing: border-box;
+	background: #B82525;
 }
 
-
-.player-controller-right input[type="range"]::-webkit-slider-thumb {
-    height: 12px;
-    width: 12px;
-    border: 4px solid #fff;
-    margin-top: -3px;
-}
-
-.full-screen {
-	width: 100%;
-	height: 100%;
-}
-
-@keyframes fadeOutDown {
-  from {
-  	opacity: 1;
-  }
-
-  to {
-  	opacity: 0;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-  	opacity: 0;
-  }
-
-  to {
-  	opacity: 1;
-  }
-}
-
-.fadeInUp {
-	animation-name: fadeInUp;
-	animation-duration: 1s;
-  	animation-fill-mode: both;
-}
-
-.fadeOutDown {
-	animation-name: fadeOutDown;
-	animation-duration: 1s;
-  	animation-fill-mode: both;
-}
-
-.full-screen .player-video-wrapper {
-	width: 100%;
-	height: 100%;
-}
-
-.full-screen .player-controller {
+#player .player-controller {
 	position: absolute;
 	bottom: 0;
-}
-
-.end .video-box {
-	top: 0;
 	left: 0;
 	width: 100%;
-	height: 100%;
-	background: #000;
-}
-
-.stalled .video-box {
-	width: 100px;
-	height: 100px;
-	margin: -50px 0 0 -50px;
-	background: transparent;
-}
-
-@keyframes circle {
-	from {
-		transform: rotate(0deg);
-	}
-
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-.stalled .video-box span,
-.end .video-box span {
-	display: inline-block;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	margin: auto;
+	font-size: 13px;
 	color: #fff;
-	font-size: 26px;
-	width: 120px;
-	height: 60px;
+	z-index: 1;
 }
 
-.end .video-box span {
+.player-controller .progress {
+	width: 100%;
+}
+
+.player-controller .control {
+	display: flex;
+	justify-content: space-between;
+	padding: 8px 0;
+}
+
+.control .controller,
+.control .volume {
+	display: flex;
+	padding: 0 15px;
+}
+
+.controller__state-left {
+	width: 2.5em;
+	font-size: 20px;
+	text-align: center;
+}
+
+.controller__state-right {
+	display: flex;
+	align-items: center;
+	line-height: 16px;
+}
+
+.controller__state-right .sepertor {
+	padding: 0 3px;
+}
+
+.controller__state-right .current {
+	display: inline-block;
+	width: 2.6em;
+}
+
+
+.volume {
+	display: flex;
+	align-items: center;
+	font-size: 2em;
 	cursor: pointer;
 }
 
-.end .video-box span i {
-	transform: rotate(-60deg);
-}
-
-.end .video-box span::after {
-	content: "重播";
+.volume .slider {
+	position: relative;
+	width: 3em;
 	margin-left: 10px;
+	border-radius: 2px;
 }
 
-.stalled .loading {
-	animation: circle 800ms ease-in-out infinite;
+.volume .slider .slider-runway {
+	width: 12px;
+	height: 12px;
+	top: -2px;
+	transform: translateX(-50%);
 }
+
+.volume .slider .thumb {
+	width: 10px;
+	height: 10px;
+	border-width: 3px;
+}
+
+
+

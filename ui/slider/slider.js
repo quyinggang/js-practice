@@ -39,6 +39,7 @@
 			const { runway } = this.dom;
 			on(runway, {
 				'click': function(event) {
+					console.log(runway);
 					const contentBox = runway.getBoundingClientRect();
 					const percent = (event.clientX - contentBox.left) / contentBox.width * 100;
 					that.thumb.currentPosition = Math.max(0, Math.min(percent, 100));
