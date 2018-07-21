@@ -35,6 +35,7 @@ body {
 
 .slider .slider-progress {
 	background: #B82525;
+	transition: .2s;
 }
 
 .slider .slider-runway {
@@ -45,6 +46,7 @@ body {
 	transform: translateX(-2px);
 	cursor: pointer;
 	z-index: 2;
+	transition: .2s;
 }
 
 .slider .slider-runway .thumb {
