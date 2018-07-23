@@ -1,177 +1,107 @@
-@charset 'utf-8';
-
-* {
-	padding: 0;
-	margin: 0;
-}
-
-.none {
-	width: 0;
-	height: 0;
-	visible: hidden;
-}
-
-.audio {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	margin: auto;
-	width: 1024px;
-	height: 48px;
-	color: #7A7A7C;
-	background: #222225;
-}
-
-.audio span,
-.audio > div {
-	overflow: hidden;
-}
-
-.audio * {
-	display: inline-block;
-}
-
-.audio span {
-	height: 48px;
-	line-height: 48px;
-	text-align: center;
-	font-size: 23px;
-}
-
-.audio span i:hover {
-	color: #fff;
-	cursor: pointer;
-}
-
-.audio-progress .slider-runway, 
-.audio-volume-adjust div {
-	cursor: pointer;
-}
-
-/*controller相关样式*/
-.audio .audio-controller {
-	width: 195px;
-	height: inherit;
-}
-.audio-controller > span {
-	width: 65px;
-}
-
-/*bar相关样式*/
-.audio .audio-bar {
-	position: relative;
-	width: 650px;
-	height: inherit;
-}
-
-.audio-bar .audio-progress {
-	width: 550px;
-	height: inherit;
-}
-
-.audio-progress .slider-runway {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 520px;
-	height: 6px;
-	margin: -3px 0 0 -260px;
-	border-radius: 5px;
-	background: #171719;
-}
-
-.slider-runway .slider-progress {
-	position: absolute;
-	width: 0;
-	height: 100%;
-	background: #B82525;
-}
-
-.slider-runway .thumb-wrapper {
+html,
+body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 26px;
-	height: 26px;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.audio {
+	display: flex;
+	align-items: center;
+	width: 600px;
+	height: 46px;
+	color: #fff;
+	background: rgb(40,41,35);
+	user-select: none;
+}
+
+.slider-container {
+	width: 100%;
+	margin: 0 1em;
+}
+
+.slider {
+	position: relative;
+	width: 100%;
+	height: 5px;
+	border-radius: 3px;
+	background: rgba(144,147,153,1);
+	cursor: pointer;
+}
+
+.slider .slider-progress {
+	height: 100%;
+	width: 0;
+	border-radius: 3px;
+	background: #B82525;
+}
+
+.slider .slider-runway {
 	position: absolute;
 	top: 50%;
-	margin-top: -13px;
-	transform: translateX(-50%);
-	z-index: 2000;
-}
-
-.thumb-wrapper .thumb {
 	width: 16px;
 	height: 16px;
-	background: #B82525;
-	border: 6px solid #fff;
-	border-radius: 50%;
-	box-sizing: border-box;
-}
-.audio-bar span {
-	width: 50px;
-	color: #fff;
-	font-size: 14px;
+	margin-top: -8px;
+	transform: translateX(-50%);
 }
 
-.audio-bar .audio-time-duration {
-	position: absolute;
-	right: 0;
-	text-align: center;
-}
-
-/*volume*/
-.audio .audio-volume {
-	width: 171px;
-	height: inherit;
-	margin: 0 4px;
-}
-
-.audio-volume .audio-volume-icon {
-	width: 40px;
-	padding-left: 15px;
-	box-sizing: border-box;
-	text-align: left;
-}
-.audio-volume .audio-volume-adjust {
-	position: relative;
-	width: 131px;
-	height: inherit;
-}
-
-.audio-volume-adjust > div, 
-.audio-volume-adjust > div div:first-child {
+.slider .slider-runway .thumb {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	width: 110px;
-	height: 4px;
-	margin: -2px 0 0 -55px;
-	border-radius: 10px;
-	background: #171719;
-	overflow: visible;
-}
-
-.audio-volume-adjust > div div:first-child {
-	width: 0;
-	background: #B82525;
-}
-
-.audio-volume-adjust > div div:last-child {
-	position: absolute;
-	top: 50%;
-	left: -6px;
 	width: 12px;
 	height: 12px;
-	margin-top: -6px;
-	border-radius: 50%;
-	background: #B82525;
-	box-sizing: border-box;
+	margin: -6px 0 0 -6px;
 	border: 4px solid #fff;
+	background: #B82525;
+	border-radius: 50%;
+	box-sizing: border-box;
 }
 
-.audio-volume-adjust > div div:last-child:hover {
-	box-shadow: 0 0 8px rgba(255, 255, 255, .8);
+.audio .audio-controller {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	width: 16%;
+	height: 100%;
+}
+
+.audio-controller .fa {
+	cursor: pointer;
+}
+
+.audio .audio-progress {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	width: 65%;
+	height: 100%;
+	font-size: 12px;
+}
+
+.audio-progress .time__current,
+.audio-progress .time__end {
+	display: inline-block;
+	width: 4.5em;
+	text-align: center;
+}
+
+.audio .audio-volume {
+	display: flex;
+	align-items: center;
+	width: 19%;
+	height: 100%;
+	padding: 0 1em;
+}
+
+.audio-volume .icon__volume {
+	margin-right: 1em;
+}
+
+.audio-volume .slider {
+	height: 3px;
 }
