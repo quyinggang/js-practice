@@ -98,4 +98,8 @@ JavaScript实践案例
 #### 俄罗斯方块
 [俄罗斯方块博客文章](http://blog.csdn.net/s1879046/article/details/79298234)     
 实现效果：    
-![视频播放](./images/tetris.png)
+![俄罗斯方块](./images/tetris.png)    
+
+#### 视觉差效果浅析demo效果     
+![视觉差效果浅析](./images/parallax.gif)   
+

@@ -1,0 +1,40 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  height: 0;
+}
+.container {
+  width: 700px;
+  height: 100%;
+  margin: auto;
+}
+
+.container .section {
+  color: #fff;
+  margin-bottom: 100px;
+  height: 300px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.section .h1 {
+  display: block;
+  font-size: 2em;
+  padding: .5em 0;
+  line-height: 100px;
+}
+
+.container .section:first-child {
+  margin-top: 100px;
+}
+
+.container .section:nth-of-type(2) {
+  background: #F56C6C;
+}
+
+.container .section:nth-of-type(3) {
+  background: #409EFF;
+}
