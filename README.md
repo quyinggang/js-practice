@@ -72,7 +72,7 @@ JavaScript实践案例
 
 **Table**     
 > 该demo实现固定表头和固定列（只固定在左侧）的效果    
-![table](./image/table.gif)           
+![table](./images/table.gif)           
 
 #### 音乐播放器
 
