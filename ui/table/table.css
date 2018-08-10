@@ -1,0 +1,131 @@
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 100%;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.is-left {
+  text-align: left;
+}
+
+.is-border th,
+.is-border td {
+  border: 1px solid #ebeef5;
+}
+
+.is-border th:nth-of-type(n),
+.is-border td:nth-of-type(n) {
+  border-left: none;
+}
+
+.is-border td:nth-of-type(n) {
+  border-bottom: none;
+}
+
+.is-border th:nth-of-type(1),
+.is-border td:nth-of-type(1) {
+  border-left: 1px solid #ebeef5;
+}
+
+.is-border tr:nth-last-of-type(1) td {
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-wrapper {
+  position: relative;
+}
+
+.table {
+  position: relative;
+  color: #606266;
+  font-size: 15px;
+  background: #fff;
+}
+
+.table__header-wrapper,
+.table__body-wrapper {
+  width: 100%;
+}
+
+.table table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+}
+
+.table__header-wrapper {
+  height: 48px;
+  overflow: hidden;
+}
+
+.table__body-wrapper {
+  overflow: auto;
+}
+
+.table th,
+.table td {
+  color: #909399;
+  padding: 12px 0;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+}
+
+.table__body tr {
+  transition: background-color .25s ease;
+}
+
+.table__body tr:hover td {
+  background-color: #f5f7fa;
+}
+
+.table .cell {
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 23px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.table__fixed-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+ .table__fixed-wrapper .table__body-wrapper {
+  overflow: hidden;
+ }
+
+
+.hover-tr td {
+  background: #f5f7fa;
+}
+
+.table__fixed-wrapper th.is-hidden >*,
+.table__fixed-wrapper td.is-hidden >* {
+  visibility: hidden;
+}
+
+.is-scroll-x .table__fixed-wrapper {
+  box-shadow: 0 0 10px rgba(0,0,0,.12);
+}
+
+.is-scroll-y .table__header-wrapper {
+  box-shadow: 0 1px 10px rgba(0,0,0,.12);
+}
+

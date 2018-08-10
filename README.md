@@ -68,7 +68,11 @@ JavaScript实践案例
 
 **Upload**    
 > 上传进度以及上传之后查看删除都没有在页面体现，你可以通过控制台查看上传进度
-![upload](./images/upload.png)         
+![upload](./images/upload.png)    
+
+**Table**     
+> 该demo实现固定表头和固定列（只固定在左侧）的效果    
+![table](./image/table.gif)           
 
 #### 音乐播放器
 

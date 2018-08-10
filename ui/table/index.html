@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="../common/common.css">
+    <link rel="stylesheet" href="./table.css">
+    <script src="../common/common.js"></script>
+</head>
+
+<body>
+    <div class="container"></div>
+    <script src="./table.js"></script>
+    <script>
+    const tableData = [{
+            date: '2016-05-03',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        },
+        {
+            date: '2016-05-02',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }, {
+            date: '2016-05-04',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }, {
+            date: '2016-05-01',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }, {
+            date: '2016-05-08',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }, {
+            date: '2016-05-06',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }, {
+            date: '2016-05-07',
+            name: '王小虎',
+            province: '上海',
+            city: '普陀区',
+            address: '上海市普陀区金沙江路',
+            zip: 200333
+        }
+    ];
+
+    new Table({
+        el: '.container',
+        data: tableData,
+        border: 'border',
+        height: '200'
+    }, [
+      {
+        label: '日期',
+        prop: 'date',
+        fixed: 'left',
+        width: '150'
+      },
+      {
+        label: '姓名',
+        prop: 'name',
+        width: '120'
+      },
+      {
+        label: '省份',
+        prop: 'province',
+        width: '120'
+      },
+      {
+        label: '市区',
+        prop: 'city',
+        width: '120'
+      },
+      {
+        label: '地址',
+        prop: 'address',
+        width: '300'
+      },
+      {
+        label: '邮编',
+        prop: 'zip',
+        width: '120'
+      }
+    ]);
+    </script>
+</body>
+
+</html>
