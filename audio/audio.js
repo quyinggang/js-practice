@@ -42,9 +42,17 @@
     }
   };
 
+  /**
+   * audio: audio element
+   * srcs：歌曲列表
+   * controller: 控制区域对象
+   * volume: 声音对象
+   * isPlaying: 播放状态
+   * currentIndex: 当前src源的下标
+   * meta: 视频元数据
+   */
   const Audio = function() {
     this.audio = null;
-    this.currentSrc = null;
     this.srcs = ['./file/unravel.mp3', './file/远走高飞.mp3'];
     this.controller = null;
     this.progress = null;
@@ -59,6 +67,7 @@
   };
 
   Audio.prototype = {
+    // 构建视图 + 事件绑定
     init: function() {
       this.audio = this.createAudio();
       this.controller = new Controller(this);
