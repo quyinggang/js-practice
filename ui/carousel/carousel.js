@@ -9,7 +9,7 @@
   let timer = null;
 
   /**
-   * 改变index, 计算没有item的translate偏移量（核心）
+   * 改变index, 计算相应的translate偏移量（核心）
    * @param index 位置下标
    * @param activeIndex 当前item的下标
    * @param length  所有item的个数    
@@ -32,14 +32,9 @@
    * @param  {[type]}   delay        延时
    * @param  {[type]}   noTrailing   最后一次是否调用callback， true不执行
    * @param  {Function} callback     回调函数
-   * @param  {[type]}   debounceMode 模式：false -> throttle true -> debounce
+   * @param  {[type]}   debounceMode 模式 
    *
    * throttle-debounce源码
-   * 分为如下几种情况：
-   * - 300 true cb true => exec，没有节流效果
-   * - 300 true cb => 只执行elapsed > delay部分
-   * - 300 false cb => 如上, 如果elpsed < delay 会执行timeoutID设置部分
-   * - 300 false cb true => exec、timeoutID部分
    */
   const throttle = function(delay, noTrailing, callback, debounceMode) {
     // 定时器ID
@@ -49,38 +44,59 @@
     function wrapper () {
       var self = this;
       // 计算当前触发与上一次执行函数之间时间间隔
-      var elapsed = Number(new Date()) - lastExec;
+      var elapsed = +new Date() - lastExec;
       var args = arguments;
 
       // 执行函数并设置触发时间为当前时间
-      function exec () {
-        lastExec = Number(new Date());
+      const exec = function () {
+        lastExec = +new Date();
         callback.apply(self, args);
-      }
+      };
 
-      function clear () {
+      const clear = function() {
         timeoutID = undefined;
-      }
+      };
 
-      // debounce时，第一次主动触发
-      if ( debounceMode && !timeoutID ) {
-        exec();
-      }
+      /*
+        debounceMode: undefined、false、true
+        true
+        - 首先执行一次回调函数
+        - noTrailing只处理非true情况，setTimeout(clear, delay)
 
-      // 清除当前定时器
-      if ( timeoutID ) {
-        clearTimeout(timeoutID);
-       }
-      if ( debounceMode === undefined && elapsed > delay ) {
+        false
+        - noTrailing只处理非true情况，setTimeout(exec, delay)
+
+        undefined
+        - elapsed > delay，执行回调
+        - exapsed <= delay，noTrailing只处理非true情况，
+          setTimeout(exec, delay - elapsed)
+          elapsed取决于触发的频率，频率越快，elapsed值越小，相应的delay - elapsed值越大
+       */
+
+      // 第一次主动触发
+      if (debounceMode && !timeoutID) exec();
+
+      if (timeoutID) clearTimeout(timeoutID);
+
+      if (debounceMode === undefined && elapsed > delay) {
         exec();
-      } else if ( noTrailing !== true ) {
+      } else if (noTrailing) {
         timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
       }
     }
     return wrapper;
   };
 
-  const Carousel = function(autoPlay) {
+  /**
+   * 轮播对象
+   * dom: Carousel DOM对象
+   * items: 轮播项集合
+   * indicators：轮播项指定点集合
+   * activeIndex：当前显示的轮播项
+   * leftDom：向左切换图标DOM节点
+   * rightDom：向右切换图标DOM节点
+   */
+  const Carousel = function() {
     this.dom = null;
     this.items = null;
     this.indicators = null;
@@ -115,6 +131,7 @@
       this.on();
       this.setItemsPosition();
     },
+    // 左右切换事件绑定
     on: function() {
       const that = this;
       const _traggle = throttle(300, true, type => {
@@ -131,12 +148,14 @@
         }
       });
     },
+    // 上一张
     prev: function() {
       const { activeIndex, items } = this;
       const targetIndex = activeIndex - 1;
       this.activeIndex = targetIndex < 0 ? items.length - 1 : targetIndex;
       this.setItemsPosition();
     },
+    // 下一张
     next: function() {
       const { activeIndex, items } = this;
       const targetIndex = activeIndex + 1;
@@ -156,6 +175,7 @@
         removeClass(item.dom, classes.active);
       });
     },
+    // 设置轮播项位置：无缝切换等效果在此处理
     setItemsPosition: function() {
       const { activeIndex, items, indicators } = this;
       const targetIndircator = indicators[activeIndex];
@@ -171,6 +191,9 @@
     }
   };
 
+  /**
+   * 轮播项对象
+   */
   const CarouselItem = function(params) {
     const { parent, dom, width, isActive, index} = params;
     this.dom = dom;
@@ -182,7 +205,7 @@
   };
 
   CarouselItem.prototype = {
-    // 核心，计算translate
+    // 核心，计算translate即偏移距离
     computedTranslate: function() {
       const { index, parent, width } = this; 
       const { activeIndex, items } = parent;

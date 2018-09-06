@@ -25,6 +25,7 @@
         }
       });
     },
+    // 创建table节点
     createTable: function(className) {
       const table = this.createEle('table', className);
       table.border = 0;
@@ -36,6 +37,7 @@
       if (!node || !('nodeType' in node)) return;
       node.className = String(node.className).replace(className, '').trim();
     },
+    // 处理固定列时同行hover效果
     bindTREvents: function(targetTrs, otherTrs) {
       if (!Array.isArray(targetTrs)) return;
       const targetClass = 'hover-tr';

@@ -4,6 +4,9 @@
     scroll: 'is-scroll'
   };
 
+  /**
+   * Scroll对象
+   */
   const Scroll = function() {
     this.dom = null;
     this.wrap = null;

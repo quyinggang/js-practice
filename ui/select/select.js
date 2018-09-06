@@ -24,7 +24,16 @@
       value: 3
     }
   ];
-
+  /**
+   * select对象
+   * 属性：
+   *   select：select DOM对象
+   *   input：输入框DOM对象
+   *   panel：下拉面板对象
+   *   state：下面面板是否打开状态
+   *   options：选择项集合
+   *   currentOption：当前选择项
+   */
   const Select = function() {
     this.select = null;
     this.input = null;
@@ -32,7 +41,6 @@
     this.state = false;
     this.options = null;
     this.currentOption = null;
-    this.isInit = false;
     this.init();
   };
 
@@ -50,20 +58,21 @@
       const inputBox = select.getBoundingClientRect();
       const top = inputBox.top + inputBox.height + 10;
       const dropCssText = `min-width:${inputBox.width}px;position:absolute;left:${inputBox.left}px;top:${top}px;`;
+      // 点击select触发下拉框显示
       on(select, {
         'click': function(e) {
           e.stopPropagation();
           let isInit = false;
           input.children[0].focus();
-          if (!that.isInit) {
+          if (!that.panel) {
             isInit = true;
-            that.isInit = true;
             that.panel = new Panel(that);
           }
           that.changeState(isInit)
           that.computedPosition(dropCssText);
         }
       });
+      // 点击非下拉框和select部分关闭下拉
       on(document, {
         'click': function(e) {
           const target = e.target;
@@ -78,16 +87,20 @@
     computedPosition: function(cssText) {
       this.panel.panel.style.cssText = cssText;
     },
+    // 切换下拉框显示和隐藏
     changeState: function(isInit) {
       const { panel, input, state } = this;
       const currentState = !state;
       this.state = currentState;
       const opearClass = currentState ? addClass : removeClass;
       opearClass(input, classes.isFocus);
+      opearClass(panel.panel, classes.isDropdown);
+      // isInit处理第一次点击select下拉框动画问题
       isInit ? setTimeout(function() {
         opearClass(panel.panel, classes.isDropdown);
       }, 0) : opearClass(panel.panel, classes.isDropdown);
     },
+    // 去除上一个选项的选择状态
     resetOptions: function(index) {
       this.options.forEach(function(item, i) {
         if (i !== index) {

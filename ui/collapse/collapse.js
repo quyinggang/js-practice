@@ -18,7 +18,7 @@
         return new CollapseItem(item);
       });
       this.items.forEach(item => {
-        item.panel.style.cssText = 'height:0';
+        item.hidden();
         on(item.header, {
           click: function(event) {
             event.stopPropagation();
@@ -48,8 +48,11 @@
         panel.style.cssText = `height:${this.panelHeight + 30}px`
        ) : (
          removeClass(dom, active),
-         panel.style.cssText = 'height: 0'
+         this.hidden()
        );
+    },
+    hidden: function() {
+      this.panel.style.cssText = 'height: 0';
     }
   };
 

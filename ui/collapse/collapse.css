@@ -7,13 +7,14 @@ body {
 }
 
 .collapse {
-  border-top: 1px solid #ebeef5;
-  border-bottom: 1px solid  #ebeef5;
   overflow: hidden;
 }
 
-.collapse-item:not(:last-child).is-active {
+.collapse-item {
   border-bottom: 1px solid #ebeef5;
+}
+.collapse-item:first-child {
+  border-top: 1px solid #ebeef5;
 }
 
 .collapse .item__header {
@@ -28,13 +29,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   background: #fff;
-  border-bottom: 1px solid #ebeef5;
   cursor: pointer;
-  transform: border-bottom-color .25s;
-}
-
-.collapse .is-active .item__header {
-  border-bottom-color: transparent;
 }
 
 .icon__dropdown {
@@ -51,15 +46,15 @@ body {
   transform: rotate(45deg);
 }
 
-.collapse-item:nth-last-of-type(1) .item__header {
+/*.collapse-item:nth-last-of-type(1) .item__header {
   border-bottom: none;
 }
-
+*/
 .item__panel {
   position: relative;
   padding: 0 15px;
   box-sizing: border-box;
-  transition: height .4s, padding .3s;
+  transition: height .4s, padding .4s;
   overflow: hidden;
 }
 

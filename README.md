@@ -72,7 +72,11 @@ JavaScript实践案例
 
 **Table**     
 > 该demo实现固定表头和固定列（只固定在左侧）的效果    
-![table](./images/table.gif)           
+![table](./images/table.gif)  
+
+**Cascader**   
+> 级联选择器    
+![cascader](./images/cascader.gif)            
 
 #### 音乐播放器
 

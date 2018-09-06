@@ -6,10 +6,14 @@
   const addClass = tools.addClass;
   const removeClass = tools.removeClass;
 
-  const Checkbox = function(checkboxBox, checkbox, checked) {
-    this.checked = checked;
-    this.checkbox = checkbox;
-    this.checkboxBox = checkboxBox;
+  /**
+   * 选择框对象
+   * @param {[type]} checked 是否被选择
+   */
+  const Checkbox = function(checked) {
+    this.checked = checked || false;
+    this.checkbox = null;
+    this.checkboxBox = null;
     this.init();
   };
 
