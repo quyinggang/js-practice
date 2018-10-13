@@ -3,12 +3,14 @@
   const addEventListener = root.addEventListener;
   const removeEventListener = root.removeEventListener;
   const tools = {
+    // 节点创建
     createEle: function(className, tag) {
       tag = tag || 'div';
       const node = doc.createElement(tag);
       node.className = className;
       return node;
     },
+    // 批量节点添加
     append: function(node, child) {
       if (!node) return;
       child = Array.isArray(child) ? child : (child ? [child] : []);
@@ -16,6 +18,7 @@
         item && item.nodeType ? node.appendChild(item) : null;
       });
     },
+    // 事件绑定
     on: function(target, events) {
       if (!target || !events || !Object.keys(events)) return;
       Object.keys(events).forEach(function(ev) {
@@ -81,35 +84,42 @@
       ]);
       this.onEvents();
     },
+    // 创建audio对象
     createAudio: function() {
       const audio = tools.createEle('audio-player', 'audio');
       audio.src = this.srcs[this.currentIndex];
       audio.preload = 'auto';
       return audio;
     },
+    // 处理事件绑定
     onEvents: function() {
       const that = this;
       const { formatTime } = tools;
       tools.on(this.audio, {
+        // 元数据导入事件
         'loadedmetadata': function() {
           that.meta.duration = this.duration;
           that.progress.changeEndTime(formatTime(this.duration));
         },
+        // 播放过程时间改变事件
         'timeupdate': function() {
           const meta = that.meta;
           meta.currentTime = this.currentTime;
           that.progress.changeCurrentTime(formatTime(this.currentTime));
+          // 计算当前时间占总时间的百分比，以此计算对应的位置
           const percent = (this.currentTime / meta.duration).toFixed(6) * 100;
           that.progress.setCurrentProgress(percent);
         },
+        // 播放结束事件
         'ended': function() {
           that.next();
         }
       });
     },
     changeCurrentSrc: function() {
-      this.audio.src = this.srcs[this.currentIndex];
-      this.audio.load();
+      const audio = this.audio;
+      audio.src = this.srcs[this.currentIndex];
+      audio.load();
     },
     play: function() {
       this.audio.play();
@@ -132,7 +142,7 @@
       this.play();
     },
     setCurrentTime: function(percent) {
-      percent = percent || 0
+      percent = percent || 0;
       this.audio.currentTime = this.meta.duration * percent;
     },
     setCurrentVolume: function(volume) {
@@ -140,6 +150,9 @@
     }
   };
 
+  /**
+   * 控制区域对象
+   */
   const Controller = function($parent) {
     this.$parent = $parent;
     this.controllerArea = null;
@@ -173,16 +186,19 @@
     onEvents: function() {
       const that = this;
       const { on } = tools;
+      // 上一首
       on(this.prevIcon, {
         'click': function() {
           that.$parent.prev();
         }
       });
+      // 下一首
       on(this.nextIcon, {
         'click': function() {
           that.$parent.next();
         }
       });
+      // 播放、暂停功能实现
       on(this.stateIcon, {
         'click': function() {
           that.changeStateIcon();
@@ -193,6 +209,12 @@
     }
   };
 
+  /**
+   * 滑动条对象
+   * @param {*} $parent 
+   * @param {*} isBuffer 区分声音控制还是进度控制
+   * @param {*} currentPosition 滑块当前位置
+   */
   const Slider = function($parent, isBuffer, currentPosition) {
     this.$parent = $parent;
     this.sliderBox = null;
@@ -231,6 +253,7 @@
       const { thumbBox, sliderBox } = this;
       const { on } = tools;
       on(thumbBox, {
+        // 滑动功能的实现依赖：mousedown、mousemove、mouseup事件
         'mousedown': function(event) {
           event.stopPropagation();
           that.dragStart(event);
@@ -252,6 +275,7 @@
         }
       });
     },
+    // 根据点击位置计算对应时间或音量
     changeAudioAbort: function() {
       let percent = this.currentPosition * 0.01;
       if (this.isBuffer) {
@@ -261,6 +285,7 @@
         this.$parent.setCurrentVolume(volume);
       }
     },
+    // 更新视图
     updateView: function() {
       const { thumbBox, progressBox } = this;
       const currentPosition = this.currentPosition;
@@ -286,12 +311,16 @@
     },
     dragStart: function(event) {
       this.isDragging = true;
+      // 记录开始滑动时clientX
       this.startX = event.clientX;
+      // 记录当前位置为开始值
       this.startPosition = this.currentPosition;
     },
     dragging: function(event) {
       if (!this.isDragging) return;
       this.setPosition(event.clientX);
+      // 进度在拖动过程中不改变当前播放进度
+      // 音量设置立即改变
       if (!this.isBuffer) {
         this.changeAudioAbort();
       }

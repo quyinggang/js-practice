@@ -3,58 +3,64 @@
  * quyinggang
  */
 !(function(root, undefined) {
-	let doc = document,
-		formats = ['yyyy-MM-dd', 'localDate'],
-		defaultConfig = {
-			el: '',
-			type: 'date',
-			range: false,
-			format: formats[0],
-			start: null,
-			end: null
-		},
-		classes = {
-			date: 'date-picker',
-			range: 'date-range-picker',
-			panel: 'date-picker-panel',
-			header: 'panel-header',
-			content: 'panel-content',
-			footer: 'panel-footer',
-			yearLeft: 'fa fa-angle-double-left',
-			monthLeft: 'fa fa-angle-left',
-			yearRight: 'fa fa-angle-double-right',
-			monthRight: 'fa fa-angle-right',
-			dot: 'fa fa-circle',
-			today: 'today',
-			current: 'current',
-			active: 'active',
-			diabled: 'disabled',
-			normal: 'normal',
-			prevMonth: 'prev-month',
-			nextMonth: 'next-month',
-			none: 'none',
-			hidden: 'hidden',
-			left: 'is-left',
-			right: 'is-right',
-			inRange: 'is-in-range',
-		},
-		tools = {},
-		weeks = ['日', '一', '二', '三', '四', '五', '六'],
-		monthOf31s = [1, 3, 5, 7, 8, 10, 12];
+	const doc = document;
+	const formats = ['yyyy-MM-dd', 'localDate'];
+	const defaultConfig = {
+		el: '',
+		type: 'date',
+		format: formats[0],
+		start: null,
+		end: null,
+		value: null
+	};
+	const classes = {
+		date: 'date-picker',
+		range: 'date-range-picker',
+		panel: 'date-picker-panel',
+		header: 'panel-header',
+		content: 'panel-content',
+		footer: 'panel-footer',
+		yearLeft: 'fa fa-angle-double-left',
+		monthLeft: 'fa fa-angle-left',
+		yearRight: 'fa fa-angle-double-right',
+		monthRight: 'fa fa-angle-right',
+		dot: 'fa fa-circle',
+		today: 'today',
+		current: 'current',
+		active: 'active',
+		disabled: 'disabled',
+		normal: 'normal',
+		prevMonth: 'prev-month',
+		nextMonth: 'next-month',
+		none: 'none',
+		hidden: 'hidden',
+		left: 'is-left',
+		right: 'is-right',
+		inRange: 'is-in-range',
+	};
+	const tools = {};
+	const toString = Object.prototype.toString;
+	const weeks = ['日', '一', '二', '三', '四', '五', '六'];
+	const monthOf31s = [1, 3, 5, 7, 8, 10, 12];
 
 	// 判断对象
 	tools.isObject = function(obj) {
-		return Object.prototype.toString.call(obj) === "[object Object]";
+		return toString.call(obj) === "[object Object]";
 	};
 
 	// 判断日期对象
 	tools.isDate = function(date) {
-		return Object.prototype.toString.call(date) === '[object Date]';
+		return toString.call(date) === '[object Date]';
 	};
+
+	// class是否存在
+	tools.isExistClass = function(className, target) {
+		return className.indexOf(target) >= 0;
+	}
 
 	// 位数补齐
 	tools.pad = function(val) {
-		let numberVal = parseInt(val) || 0;
+		const numberVal = parseInt(val) || 0;
 		return numberVal < 10 ? '0' + numberVal : numberVal;
 	};
 
@@ -76,9 +82,7 @@
 
 	// 移除class
 	tools.removeClass = function(elem, className) {
-		if (!elem || !elem.nodeName) {
-			return;
-		}
+		if (!elem || !elem.nodeName) return;
 		elem.className = String(elem.className).replace(className, '');
 	};
 
@@ -110,11 +114,11 @@
 		return o;
 	};
 
-
-	let createDetail = function(item) {
-		let nodes = [],
-			items = String(item).split('*'),
-			count = parseInt(items[1]);
+	// 批量处理节点添加
+	const createDetail = function(item) {
+		const nodes = [];
+		const items = String(item).split('*');
+		const count = parseInt(items[1]);
 
 		if (count) {
 			for (let index = 0; index < count; index++) {
@@ -125,9 +129,9 @@
 	}
 	// 创建节点
 	tools.create = function(elems) {
-		let isArray = Array.isArray(elems),
-			isString = typeof elems === 'string',
-			nodes = [];
+		const isArray = Array.isArray(elems);
+		const isString = typeof elems === 'string';
+		const nodes = [];
 
 		if (isArray) {
 			elems.forEach((item) => {
@@ -141,7 +145,8 @@
 
 	// 获取年月日时分秒
 	tools.getYMD = function(date) {
-		let result = {};
+		if (!date) return {};
+		const result = {};
 		if (tools.isDate(date)) {
 			result.year = date.getFullYear();
 			result.month = date.getMonth() + 1;
@@ -150,7 +155,7 @@
 			result.minutes = date.getMinutes() || 0;
 			result.seconds = date.getSeconds() || 0;
 		} else {
-			let d = String(date).replace(/[^\d]/g, '');
+			const d = String(date).replace(/[^\d]/g, '');
 			result.year = parseInt(d.substring(0, 4));
 			result.month = parseInt(d.substring(4, 6)) + 1;
 			result.day = parseInt(d.substring(6, 8));
@@ -186,86 +191,97 @@
 		return year === curYear && month === curMonth && day === curDay;
 	}
 	// 日期内容数据
-	tools.createCells = function(dates, that) {
-		let {year, month, day} = dates,
-			{start, end} = that.settings,
-			isRange = that.section.isRange,
-			rangeDate = that.section.rangeDate,
-			dayInWeek = new Date(year, month - 1, 1).getDay(),
-			line = 6,
-			row = 7,
-			cells = [],
-			wkCells = [],
-			lineStart = 0,
-			currentMonth = parseInt(month),
-			daysofCurrentMonth = tools.getDaysOfMonth(currentMonth, year),
-			daysOfPrevMonth = tools.getDaysOfMonth(currentMonth === 1 ? 11 : currentMonth - 1, year);
+	tools.createCells = function(option, panel) {
+		// 当前选择日期
+		const selectedValue = panel.$parent.$parent.value;
+		const {
+			year: oldYear,
+			month: oldMonth,
+			day: oldDay
+		} = tools.getYMD(selectedValue);
+		// 当前面板日期
+		let { year, month } = option;
+		// 支持范围选择
+		const section = panel.$parent;
+		const { start, end } = section.$parent.settings;
+		// const { isRange, dates } = section;
+		// 本月1号是周几
+		const dayInWeek = new Date(year, month - 1, 1).getDay();
+		const line = 6;
+		const row = 7;
+		// 具体的日期点Cell集合
+		const cells = [];
+		// 周几Cell集合
+		const wkCells = [];
+		// 每格对应的具体天
+		let currentValue = 0;
+		// 当前月
+		const currentMonth = parseInt(month);
+		// 当前月总天数
+		const daysofCurrentMonth = tools.getDaysOfMonth(currentMonth, year);
+		// 上个月总天数
+		const daysOfPrevMonth = tools.getDaysOfMonth(currentMonth === 1 ? 11 : currentMonth - 1, year);
 
+		// 周显示行Cell创建
 		for (let index = 0, len = weeks.length; index < len; index++) {
 			wkCells.push(new Cell(0, index, weeks[index]));
 		}
+		// 行
 		for (let le = 0; le < line; le++) {
 			let rows = [];
+			// 列
 			for (let rw = 0; rw < row; rw++) {
+				// 处理上个月在本月面板展示的天
 				if (le === 0) {
-					dayInWeek === 0 ? (function() {
-						rows.push(new Cell(le, rw, daysOfPrevMonth - row + rw + 1, -1));
-					}()) : (function() {
-						rw < dayInWeek ? rows.push(new Cell(le, rw, daysOfPrevMonth - dayInWeek + rw + 1, -1)) :
-							rows.push(new Cell(le, rw, rw - dayInWeek + 1));
-					}());
+					// 本月1号是星期天情况
+					dayInWeek === 0
+						? rows.push(new Cell(le, rw, daysOfPrevMonth - row + rw + 1, -1))
+						: rw < dayInWeek
+								? rows.push(new Cell(le, rw, daysOfPrevMonth - dayInWeek + rw + 1, -1))
+								: rows.push(new Cell(le, rw, rw - dayInWeek + 1));
+					// 第一行最后一列	
 					if (rw === row - 1) {
+						// 获取第一行最后一列表示的当前日期
 						let endValue = rows[rows.length - 1].value;
-						lineStart = endValue + 1 > daysOfPrevMonth ? daysOfPrevMonth - endValue : endValue;
+						// 处理超出上个月
+						currentValue = endValue + 1 > daysOfPrevMonth ? daysOfPrevMonth - endValue : endValue;
 					}
 				} else  {
-					lineStart += 1;
-					if (lineStart === day && lineStart <= daysofCurrentMonth) {
-						rows.push(new Cell(le, rw, lineStart));
-					} else if (lineStart <= daysofCurrentMonth) {
-						rows.push(new Cell(le, rw, lineStart));
+					currentValue += 1;
+					if (currentValue <= daysofCurrentMonth) {
+						// 本月
+						rows.push(new Cell(le, rw, currentValue, 0));
 					} else {
-						rows.push(new Cell(le, rw, lineStart - daysofCurrentMonth, 1));
+						// 下月
+						rows.push(new Cell(le, rw, currentValue - daysofCurrentMonth, 1));
 					}
 				}
+
 				let cell = rows.pop();
-				if (cell.isCurrentMonth === 0) {
-					isRange ? (function() {
-						let [sd, ed] = rangeDate.length ? rangeDate : '',
-							tempDate = new Date(year, month - 1, cell.value);
-
-						if (sd) {
-							if (tempDate >= sd && tempDate <= ed) {
-								if (tempDate - sd === 0 || tempDate - ed === 0) {
-									cell.isCurrent = true;
-								}
-								cell.isINRange = true;
-							}
-						}
-
-					}()) : (function() {
-						day = Array.isArray(day) ? day : [day];
-						cell.isCurrent = day.includes(cell.value) ? true : false;
-					}());
+				// 处理已选择的对应日期高亮显示以及切换时非本月相同天情况
+				if (cell.isCurrentMonth === 0 && selectedValue) {
+					const isCurrentYM = year === oldYear && month === oldMonth;
+					cell.isActive = isCurrentYM && oldDay === cell.value ? true : false;
 				}
+				// 现在时间特殊处理
 				if (tools.isToday(year, month, cell.value)) {
 					cell.isToday = true;
 					cell.note = '今天';
 				}
-				if (start || end) {
-					let [cy, cm] = cell.isCurrentMonth < 0 ? (month === 1 ? [year - 1, 11] : 
-						[year, month - 2]) : (cell.isCurrentMonth === 0 ? [year, month - 1] : 
-						(month === 12 ? [year + 1, 1] : [year, month])),
-						curDate = new Date(cy, cm, cell.value),
-						{year: sy, month: sm, day: sd} = start ? tools.getYMD(start) : '',
-						{year: ey, month: em, day: ed} = end ? tools.getYMD(end): '';
-
-					if (sy && new Date(sy, sm - 2, sd) > curDate) {
-						cell.isActive = false;
-					}
-					if (ey && new Date(ey, em - 2, ed) < curDate) {
-						cell.isActive = false;
-					}
+				// 处理可选日期范围
+				if (tools.isDate(start) || tools.isDate(end)) {
+					// 上个月、本月、下个月构建Date时年月的处理
+					const [cy, cm] = cell.isCurrentMonth < 0 ? (
+						month === 1 ? [year - 1, 11] : [year, month - 2]
+					) : (
+						cell.isCurrentMonth === 0 ? [year, month - 1] : 
+						(
+							month === 12 ? [year + 1, 1] : [year, month]
+						)
+					);
+					const curDate = new Date(cy, cm, cell.value);
+					if (start && curDate < start) cell.isDisabled = true;
+					if (end && curDate > end) cell.isDisabled = true;
 				}
 				rows.push(cell);
 			}
@@ -274,9 +290,10 @@
 		return [wkCells, cells];
 	};
 
-	// 依据cells构建内容节点
-	tools.getContextArea = function(trCount, cells, wks) {
-		let [[table], trs] = tools.create(['table*1', `tr*${trCount}`]);
+	// 依据cells构建内容节点DOM
+	tools.getContextArea = function(cells, wks) {
+		const cellNodes = [];
+		const [[table], trs] = tools.create(['table*1', `tr*7`]);
 		if (Array.isArray(wks)) {
 			let weekTr = trs[0];
 			wks.forEach((item) => {
@@ -287,173 +304,106 @@
 			table.appendChild(weekTr);
 		}
 		for (let index = 0, len = cells.length; index < len; index++) {
-			let lines = cells[index],
-				length = lines.length,
-				trNode = trs[index + 1];
-
+			const lines = cells[index];
+			const length = lines.length;
+			const trNode = trs[index + 1];
+			const cellTr = [];
 			for (let rw = 0; rw < length; rw++) {
-				let [[td]] = tools.create('td*1'),
-					cell = lines[rw];
-				td.innerText = cell.value;
-				if (cell.isToday) {
+				const [[td]] = tools.create('td*1');
+				const { 
+					isDisabled, 
+					isActive, 
+					isCurrentMonth, 
+					line, 
+					row,
+					value,
+					isToday
+				} = lines[rw];
+				td.setAttribute('data-index', `${line}-${row}`);
+				td.innerText = value;
+				if (isToday) {
 					td.innerText = '今天';
 					tools.addClass([{node: td, className: classes.today}]);
 				}
-				cell.isINRange ? tools.addClass([{node: td, className: classes.inRange}]) : '';
-				!cell.isActive ? tools.addClass([{node: td, className: classes.diabled}]) : '';
-				cell.isCurrent ? tools.addClass([{node: td, className: classes.current}]) : '';
-				cell.isCurrentMonth === 0 ? tools.addClass([{node: td, className: classes.normal}]) : 
-					(function() {
-						let className = cell.isCurrentMonth < 0 ? classes.prevMonth : classes.nextMonth;
-						tools.addClass([{node: td, className: className}]);
-					}());
-				
+				// 非范围时间点不可选择
+				isDisabled ? tools.addClass([{node: td, className: classes.disabled}]) : '';
+				// 选择时间点高亮显示处理
+				isActive? tools.addClass([{node: td, className: classes.current}]) : '';
+				// 本月、上月、下月样式显示区别
+				isCurrentMonth === 0 ? tools.addClass([{
+					node: td, 
+					className: classes.normal
+				}]) : tools.addClass([{
+					node: td,
+					className: isCurrentMonth < 0 ? classes.prevMonth : classes.nextMonth
+				}]);
+				cellTr.push(td);
 				trNode.appendChild(td);
 			}
+			cellNodes.push(cellTr);
 			table.appendChild(trNode);
 		}
 		table.setAttribute('cellspacing', '0');
 		tools.addClass([
 			{node: table, className: classes.content}
 		]);
-		return table;
+		return [table, cellNodes];
 	};
 
 	// type date时内容区数据以及节点构建
-	tools.createDateContent = function(that) {
-		let sectionObj = that.section,
-			isRange  = sectionObj.isRange,
-			rangeDate = sectionObj.rangeDate,
-			id = that.id,
-			date = that.date,
-			{year, month, day, hour, minutes, seconds} = tools.getYMD(date);
-		
-		if (!isRange) {
-			that.date = new Date(year, month - 1, day, hour, minutes, seconds);
-		}
+	tools.createDateContent = function(panel) {
+		const { currentDate } = panel;
+		const { year, month, day } = tools.getYMD(currentDate);
+		const [wkCells, cells] = tools.createCells({
+			year,
+			month,
+			day
+		}, panel);
+		const [ table, cellNodes ] = tools.getContextArea(cells, wkCells);
 
-		let options = {year: year, month: month, day: day},
-			[wkCells, cells] = tools.createCells(options, that),
-			table = tools.getContextArea(7, cells, wkCells);
-
-		return isRange ? [table, cells, options] : [table, cells];
+		return [table, cells, cellNodes];
 	}
 
-	// date
+	// 构建panel面板对象的构成对象：nav对象、content对象
 	tools.createDateView = function() {
-		let [[headerNode], [ylNode, mlNode, yNode, mNode, mrNode, yrNode], 
-			[ylIcon, mlIcon, mrIcon, yrIcon]] = tools.create(['div*1', 'span*6', 'i*4']),
-			[table, cells, headDate] = tools.createDateContent(this),
-			isRange = this.section.isRange,
-			{year, month} = isRange ? headDate : tools.getYMD(this.date);
-			isLeft = this.id > 0 ? false : true;
-
-		this.contentObj = new Content(table, cells);
-		tools.addClass([
-			{node: ylIcon, className: classes.yearLeft},
-			{node: mlIcon, className: classes.monthLeft},
-			{node: mrIcon, className: classes.monthRight},
-			{node: yrIcon, className: classes.yearRight},
-			{node: headerNode, className: classes.header},
-		]);
-
-		yNode.innerText = `${year} 年`;
-		mNode.innerText = `${month} 月`;
-
-		tools.appendChild([
-			{node: ylNode, childs: ylIcon},
-			{node: mlNode, childs: mlIcon},
-			{node: yrNode, childs: yrIcon},
-			{node: mrNode, childs: mrIcon},
-			{node: headerNode, childs: [ylNode, mlNode, yNode, mNode, yrNode, mrNode]}
-		]);
-		this.navObj = isRange ? (function() {
-			let nav = null;
-			if (isLeft) {
-				tools.addClass([
-					{node: yrNode, className: classes.hidden},
-					{node: mrNode, className: classes.hidden}
-				]);
-				nav = new Nav(headerNode, yNode, mNode, ylNode, mlNode);
-			} else {
-				tools.addClass([
-					{node: ylNode, className: classes.hidden},
-					{node: mlNode, className: classes.hidden}
-				]);
-				nav = new Nav(headerNode, yNode, mNode, null, null, mrNode, yrNode);
-			}
-			return nav;
-		}()) : new Nav(headerNode, yNode, mNode, ylNode, mlNode, mrNode, yrNode);
+		const panel = this;
+		const [ table, cells, cellNodes] = tools.createDateContent(panel);
+		panel.contentArea = new Content(panel, table, cells, cellNodes);
+		panel.navArea = new Nav(panel);
 	};
 
 	// 创建panel面板
-	tools.createPanel = function(panelObj) {
-		let [[panelNode]] = tools.create('div*1'),
-			that = panelObj,
-			className = that.section.isRange ? (that.id > 0? `${classes.panel} ${classes.right}` : 
-				`${classes.panel} ${classes.left}`) : classes.panel;
+	tools.createPanel = function() {
+		const panel = this;
+		const [[panelNode]] = tools.create('div*1');
+		const { isRange } = panel.$parent;
+		const className = isRange ? (
+			that.id > 0 ? `${classes.panel} ${classes.right}` : 
+				`${classes.panel} ${classes.left}`
+			) : classes.panel;
 
-		tools.addClass([{node: panelNode, className: className}]);
-		that.panel = panelNode;
-		tools.appendChild([{node: panelNode, childs: [that.navObj.nav, that.contentObj.content]}]);
-	};
-	// // year
-	// tools.createYearView = function() {
-	// };
-
-	// // month
-	// tools.createMonthView = function() {
-	// };
-
-	// // time(HH:mm:ss)
-	// tools.createTimeView = function() {
-	// 	let [[footerNode], [clearNode, ]] = tools.create(['div*1', 'span*3']);
-	// };
-
-	// 日期面板构建
-	tools.views = function() {
-		let type = this.settings.type;
-		switch(type) {
-			case 'date':
-				tools.createDateView.call(this);
-		}
-		tools.createPanel(this);
-	};
-
-	// 清除所有当前选中的日期样式
-	tools.clear = function(isRange) {
-		if (isRange) {
-			let currentTd = doc.querySelectorAll(`.${classes.current}`),
-				inRangeTd = doc.querySelectorAll(`.${classes.inRange}`);
-
-			for (let index = 0, len = currentTd.length; index < len; index++) {
-				let td = currentTd[index];
-				tools.removeClass(td, 'current');
+		tools.addClass([
+			{
+				node: panelNode, 
+				className
 			}
-			for (let index = 0, len = inRangeTd.length; index < len; index++) {
-				let td = inRangeTd[index];
-				tools.removeClass(td, 'is-in-range');
+		]);
+		tools.appendChild([
+			{
+				node: panelNode, 
+				childs: [
+					panel.navArea.nav, 
+					panel.contentArea.content
+				]
 			}
-		} else {
-			let currentTd = doc.querySelector(`.${classes.current}`);
-			tools.removeClass(currentTd, 'current');
-		}
-	};
-
-	// 显示日期面板
-	tools.showSection = function(sectionNode) {
-		tools.removeClass(sectionNode, classes.none);
-	};
-
-	// 隐藏日期面板
-	tools.hiddenSection = function(sectionNode) {
-		tools.addClass([{node: sectionNode, className: classes.none}]);
+		]);
+		panel.panelNode = panelNode;
 	};
 
 	// 处理日期以及日期范围的输出
 	tools.handleExports = function(date, format, type) {
-		let {year, month, day, hour, minutes, seconds} = tools.getYMD(date),
-			formatDate = null;
+		let {year, month, day, hour, minutes, seconds} = tools.getYMD(date);
+		let formatDate = null;
 
 		format = formats.includes(format) ? format : formats[0];
 		month = tools.pad(month);
@@ -487,326 +437,389 @@
 		}()) : tools.handleExports(dates, format, type);
 	};
 
-	tools.replaceContent = function(that) {
-		let [table, cells] = tools.createDateContent(that),
-			yNode = that.navObj.y,
-			mNode = that.navObj.m,
-			panel = that.panel,
-			date = that.date;
-
+	// 替换日期中的内容区域DOM以及相关对象
+	tools.replaceContent = function(panel) {
+		const [table, cells, cellNodes] = tools.createDateContent(panel);
+		const {
+			panelNode, 
+			navArea, 
+			currentDate, 
+			contentArea
+		} = panel;
+		const { year, month } = tools.getYMD(currentDate);
+		panel.contentArea = new Content(panel, table, cells, cellNodes);
 		// 替换内容区
-		panel.replaceChild(table, that.contentObj.content);
-		that.contentObj = new Content(table, cells);
-		tools.handleContentEvents(that);
+		panelNode.replaceChild(table, contentArea.content);
+		tools.handleContentEvents(panel);
 		// 替换顶部部分区域
-		year = date.getFullYear();
-		month = date.getMonth() + 1;
-		yNode.innerText = `${year} 年`;
-		mNode.innerText = `${month} 月`;
+		navArea.changeYMValue(year, month);
 	};
+
 	// 处理顶部区域事件绑定
-	tools.handleHeaderEvents = function(that) {
-		let headerNode = that.navObj.nav,
-			panel = that.panel,
-			isRange = that.section.isRange,
-			id = that.id;
+	tools.handleHeaderEvents = function(panel) {
+		const {
+			nav: headerNode,
+			yearLeftNode,
+			yearRightNode,
+			monthLeftNode,
+			monthRightNode
+		} = panel.navArea;
 
 		headerNode.addEventListener('click', function(e) {
 			e.stopPropagation();
-			let target = e.target,
-				panels = that.section.panels,
-				length = e.target.children.length;
-
-			if (length === 0 || length === 1) {
-				let className = target.className,
-					date = that.date,
-					id = that.id,
-					next = null,
-					isYL = isML = isMR = isYR = null;
-
-				let {year, month} = tools.getYMD(date);
-				isYL = String(className).indexOf(classes.yearLeft) >= 0;
-				isML = String(className).indexOf(classes.monthLeft) >= 0;
-				isMR = String(className).indexOf(classes.monthRight) >= 0;
-				isYR = String(className).indexOf(classes.yearRight) >= 0;
-
-				isML ? (function() {
-					date.setMonth(month - 2);
-					if (isRange) {
-						let {year, month, day, hour, minutes, seconds} = tools.getYMD(date);
-						next = new Date(year, month, day, hour, minutes, seconds);
-					}
-				}()) : (isMR ? (function() {
-					date.setMonth(month);
-					if (isRange) {
-						let {year, month, day, hour, minutes, seconds} = tools.getYMD(date);
-						next = new Date(year, month - 2, day, hour, minutes, seconds);
-					}
-				}()) : (isYL ? (function() {
-					date.setFullYear(year - 1);
-					if (isRange) {
-						let {year, month, day, hour, minutes, seconds} = tools.getYMD(date);
-						next = new Date(year, month, day, hour, minutes, seconds);
-					}
-				}()) : (isYR ? (function() {
-					date.setFullYear(year + 1);
-					if (isRange) {
-						let {year, month, day, hour, minutes, seconds} = tools.getYMD(date);
-						next = new Date(year, month - 2, day, hour, minutes, seconds);
-					}
-				}()) : '')));
+			const target = e.target;
+			if (target) {
+				let selectedDate = null;
+				const { currentDate } = panel;
+				const { year, month, day } = tools.getYMD(currentDate);
+				const isYL = yearLeftNode.contains(target);
+				const isYR = yearRightNode.contains(target);
+				const isML = monthLeftNode.contains(target);
+				const isMR = monthRightNode.contains(target);
 				
-				that.date = date;
-				if (isRange) {
-					panels.forEach((panel) => {
-						if (panel.id !== that.id) {
-							panel.date = next;
-						}
-						tools.replaceContent(panel);
-					});
-				} else {
-					tools.replaceContent(that);
+				// 上月、下月切换
+				if (isML || isMR) {
+					const targetMonth = isML ? month - 2 : month;
+					selectedDate = new Date(year, targetMonth, day);
+				}
+				// 上年、下年切换
+				if (isYL || isYR) {
+					const targetYear = isYL ? year - 1 : year + 1;
+					selectedDate = new Date(targetYear, month - 1, day);
+				}
+				// 防止非切换区域的点击
+				if (isYL || isYR || isML || isMR) {
+					panel.changeCurrentDate(selectedDate);
+					tools.replaceContent(panel);
 				}
 			}
 		});
 	};
 
 	// 处理内容区域事件绑定
-	tools.handleContentEvents = function(that) {
-		let contentNode = that.contentObj.content,
-			count = 0,
-			el = that.el,
-			sectionObj = that.section,
-			isRange = sectionObj.isRange,
-			panel = that.panel,
-			id  = that.id,
-			{format, type} = that.settings;
+	tools.handleContentEvents = function(panel) {
+		const { 
+			$parent: section, 
+			contentArea: {
+				cells,
+				content: contentNode
+			}, 
+			currentDate
+		} = panel;
+		const sdate = section.$parent;
+		const { input: el, settings } = section.$parent;
+		const { format, type } = settings;
+		const { isRange } = section;
+		const { year, month } = tools.getYMD(currentDate);
 
 		contentNode.addEventListener('click', function(e) {
 			e.stopPropagation();
-			let target = e.target,
-				className = String(target.className),
-				nodeName = String(target.nodeName).toLowerCase();
+			const target = e.target;
+			const className = String(target.className);
+			const nodeName = String(target.nodeName).toLowerCase();
 
-			if (nodeName === 'td' && String(className).indexOf(classes.diabled) < 0) {
-				let isCurrentMonth = className.indexOf(classes.normal) >= 0,
-					isPrevMonth = className.indexOf(classes.prevMonth) >= 0,
-					value = target.innerText,
-					selectedDay = String(value).indexOf('今天') >= 0 ? new Date().getDate() : parseInt(value),
-					{year, month, day} = tools.getYMD(that.date),
-					date = new Date(year, month - 1, day),
-					cache = null;
+			// 可选内容区域点击
+			if (nodeName === 'td' && !tools.isExistClass(className, classes.disabled)) {
+				let selectedDate = null;
+				let position = target.getAttribute('data-index');
+				position = position.split('-');
+				const targetCell = cells[Number(position[0])][Number(position[1])];
+				const { isCurrentMonth, value } = targetCell;
 
-				count += 1;
-				isCurrentMonth ? date.setDate(selectedDay) : (function() {
+				targetCell.isActive = true;
+				// 选择非本月时间处理
+				if (isCurrentMonth === 0) {
+					selectedDate = new Date(year, month - 1, value);
+				} else {
+					let selectedYear = null;
+					let selectedMonth = null;
+					const isPrevMonth = isCurrentMonth === -1;
 					if (isPrevMonth) {
-						date = month === 1 ? new Date(year - 1, 11, selectedDay) : new Date(year, month - 2, selectedDay);
+						selectedYear = month === 1 ? year - 1 : year;
+						selectedMonth = month === 1 ? 11 : month - 2;
 					} else {
-						date = month === 12 ? new Date(year + 1, 0, selectedDay) : new Date(year, month, selectedDay);
+						selectedYear = month === 12 ? year + 1 : year;
+						selectedMonth = month === 12 ? 0 : month;
 					}
-				}());
+					selectedDate = new Date(selectedYear, selectedMonth, value);
+				}
+
 				if (!isRange) {
 					tools.addClass([
-						{node: target, className: classes.current}
-					]);
-					that.date = date;
-					let attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
-					el[attr] = tools.exports(date, format, type, isRange);
-					tools.hiddenSection(that.parentNode);
-					sectionObj.status = 'off';
-				} else {
-					if (sectionObj.rangeDate.length === 2) {
-						tools.clear(isRange);
-						sectionObj.rangeDate = [];
-						count = 0;
-					}
-					count === 1 ? (function() {
-						cache = new Date(year, month - 1, day);
-						tools.clear(isRange);
-						tools.addClass([
-							{node: target, className: classes.current}
-						]);
-						sectionObj.rangeDate.push(date);
-					}()) : (count === 2 ? (function() {
-						let sdate = sectionObj.rangeDate[0];
-						tools.addClass([
-							{node: target, className: classes.current}
-						]);
-						if (date >= sdate) {
-							sectionObj.rangeDate.push(date);
-						} else if (date < sdate) {
-							sectionObj.rangeDate.unshift(date);
+						{
+							node: target,
+							className: classes.current
 						}
-					}()): '');
-					if (sectionObj.rangeDate.length > 1) {
-						let attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
-						el[attr] = tools.exports(sectionObj.rangeDate, format, type, isRange);
-						tools.hiddenSection(that.parentNode);
-						sectionObj.status = 'off';
-					}
+					]);
+					// 输出选择值到输入框
+					let attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
+					el[attr] = tools.exports(selectedDate, format, type, isRange);
+					// 设置当前选择日期
+					sdate.setSelectedValue(selectedDate);
+					panel.changeCurrentDate(selectedDate);
+					// 关闭面板
+					section.close();
 				}
 			}
 		});
-		// if (isRange) {
-		// 	contentNode.addEventListener('dbclick', function(e) {
-		// 		e.stopPropagation();
-		// 	});
-		// }
 	};
-
-	// 事件绑定以及处理
-	tools.events = function() {
-		tools.handleHeaderEvents(this);
-		tools.handleContentEvents(this);
-	};
-
 
 	/**
-	 * isCurrentMonth
-	 * -1：前一个月
-	 * 0:当月
-	 * 1: 下一个
+	 * Cell对象（组成日期面板）
+	 * @param {*} line       所属当前行
+	 * @param {*} row        所属当前列
+	 * @param {*} value      当前值
+	 * @param {*} cm         是否是当前月（-1：上个月，0：当前月，1：下个月）
+	 * @param {*} isToday    是否是今天
+	 * @param {*} isActive   当前是否被选择，用于高亮显示
+	 * @param {*} isInRange  是否在指定范围内
+	 * @param {*} isDisabled 是否可选，支持时间范围
+	 * @param {*} note       备注
 	 */
-	let Cell = function(line, row, value, cm, isToday, isActive) {
+	const Cell = function(
+		line, 
+		row, 
+		value, 
+		cm, 
+		isToday, 
+		isActive, 
+		isInRange,
+		isDisabled,
+		note
+	) {
 		this.line = line;
 		this.row = row;
 		this.value = value;
 		this.isCurrentMonth = cm || 0;
-		this.isToday = isToday || false;
-		this.isActive = isActive || true;
-		this.isINRange = false;
-		this.isCurrent = false;
-		this.note = null;
+		this.isToday = !!isToday;
+		this.isActive = !!isActive;
+		this.isInRange = !!isInRange;
+		this.note = note;
+		this.isDisabled = !!isDisabled;
 	};
 
 	/**
-	 * 日期面板顶部区域
-	 * @param {[type]} nav 顶部节点对象
-	 * @param {[type]} yl  上一年
-	 * @param {[type]} yr  下一年
-	 * @param {[type]} ml  上个月
-	 * @param {[type]} mr  下个月
-	 * @param {[type]} y   年显示
-	 * @param {[type]} m   月显示
+	 * 日期面板顶部区域对象
 	 */
-	let Nav = function(nav, y, m, yl, ml, mr, yr) {
-		this.nav = nav;
-		this.yearLeft = yl;
-		this.yearRight = yr;
-		this.monthLeft = ml;
-		this.monthRight = mr;
-		this.y = y;
-		this.m = m;
+	const Nav = function($parent) {
+		this.$parent = $parent;
+		this.nav = null;
+		this.yearNode = null;
+		this.monthNode = null;
+		this.yearLeftNode = null;
+		this.yearRightNode = null;
+		this.monthLeftNode = null;
+		this.monthRightNode = null;
+		this.init();
 	};
 
-	let Content = function(content, cells) {
+	Nav.prototype = {
+		init: function() {
+			const { currentDate } = this.$parent;
+			const { year, month } = tools.getYMD(currentDate);
+			const [
+				[headerNode, leftWrapper, middleWrapper, rightWrapper], 
+				[ylNode, mlNode, yNode, mNode, textYNode, textMNode, mrNode, yrNode], 
+				[ylIcon, mlIcon, mrIcon, yrIcon]
+			] = tools.create(['div*4', 'span*8', 'i*4']);
+			const [[yearText, monthText]] = tools.create(['span*2']);
+	
+			tools.addClass([
+				{ node: ylIcon, className: classes.yearLeft },
+				{ node: mlIcon, className: classes.monthLeft },
+				{ node: mrIcon, className: classes.monthRight },
+				{ node: yrIcon, className: classes.yearRight },
+				{ node: leftWrapper, className: 'wrapper' },
+				{ node: middleWrapper, className: 'text-wrapper' },
+				{ node: textYNode, className: 'year' },
+				{ node: textMNode, className: 'month' },
+				{ node: rightWrapper, className: 'wrapper' },
+				{ node: headerNode, className: classes.header },
+			]);
+
+			yearText.innerText = '年';
+			monthText.innerText = '月';
+
+			tools.appendChild([
+				{ node: ylNode, childs: ylIcon },
+				{ node: mlNode, childs: mlIcon },
+				{ node: yrNode, childs: yrIcon },
+				{ node: mrNode, childs: mrIcon },
+				{ node: yNode, childs: [textYNode, yearText] },
+				{ node: mNode, childs: [textMNode, monthText] },
+				{ node: leftWrapper, childs: [ylNode, mlNode] },
+				{ node: middleWrapper, childs: [yNode, mNode] },
+				{ node: rightWrapper, childs: [mrNode, yrNode] },
+				{ 
+					node: headerNode, 
+					childs: [leftWrapper, middleWrapper, rightWrapper]
+				}
+			]);
+			this.yearNode = textYNode;
+			this.monthNode = textMNode;
+			this.yearLeftNode = ylNode;
+			this.yearRightNode = yrNode;
+			this.monthLeftNode = mlNode;
+			this.monthRightNode = mrNode;
+			this.changeYMValue(year, month);
+			this.nav = headerNode;
+		},
+		// 改变顶部时间文本
+		changeYMValue: function(year, month) {
+			this.yearNode.innerText = `${year}`;
+			this.monthNode.innerText = `${month}`;
+		}
+	};
+
+	/**
+	 * 面板内容区域对象
+	 * @param {*} content 面板内容区域DOM
+	 * @param {*} cells   cell集合，构成内容区域内容
+	 */
+	const Content = function($parent, content, cells, cellNodes) {
+		this.$parent = $parent;
 		this.cells = cells;
 		this.content = content;
+		this.cellNodes = cellNodes || [];
 	};
 
-	let Panel = function(id, el, settings, date, parentNode, section) {
-		this.id = id;
-		this.el = el;
-		this.settings = settings;
-		this.date = date;
-		this.panel = null;
-		this.navObj = null;
-		this.contentObj = null;
-		this.parentNode = parentNode;
-		this.section = section;
+	/**
+	 * 时间对象
+	 * @param {*} config 配置对象
+	 * isInit     是否是初始化
+	 * setion     面板容器对象
+	 * settings   最终配置对象
+	 * input      触发文本框
+	 * userConfig 用户配置对象
+	 * value      当前输出值
+	 */
+	const SDate = function(config) {
+		this.isInit = true;
+		this.section = null;
+		this.settings = null;
+		this.input = null;
+		this.userConfig = config;
+		this.value = null;
+		this.render();
 	};
 
-	Panel.prototype.init = function() {
-		tools.views.call(this);
-		tools.events.call(this);
+	SDate.prototype = {
+		render: function() {
+			const settings = tools.extend(defaultConfig, this.userConfig);
+			const idName = String(settings.el).replace('#', '');
+			this.input = doc.getElementById(idName);
+			this.settings = settings;
+			this.section = new Section(this);
+			this.onEvents();
+		},
+		onEvents: function() {
+			const that = this;
+			const { section, input } = this;
+			const { panels } = section;
+			input.addEventListener('focus', function(e) {
+				if (!section) return;
+				section.open();
+				if (that.isInit) {
+					that.isInit = false;
+					doc.body.appendChild(section.sectionNode);
+				} else {
+					panels.forEach(panel => {
+						tools.replaceContent(panel)
+					});
+				}
+			});
+			document.addEventListener('click', function(e) {
+				e.stopPropagation();
+				const target = e.target;
+				if (!input.contains(target)) section.close();
+			});
+		},
+		setSelectedValue: function(date) {
+			this.value = date;
+		}
 	};
 
-	let Section = function(el, settings, status) {
-		this.el = el;
-		this.settings = settings;
-		this.status = status || 'off';
+	// 面板容器对象
+	const Section = function($parent) {
+		this.$parent = $parent;
+		this.status = false;
 		this.panels = [];
+		this.dates = [];
+		this.sectionNode = null;
 		this.isRange = false;
-		this.rangeDate = [];
+		this.init();
 	};
 
-	let SDate = function() {};
-
-	SDate.prototype.render = function(config) {
-		let settings = tools.extend(defaultConfig, config),
-			el = doc.getElementById(String(settings.el).replace('#', '')),
-			isRange = settings.hasOwnProperty('range') && settings.range,
-			sectionNode = doc.createElement('section'),
-			sectionObj = new Section(el, settings);
-
-		isRange ? tools.addClass([
-			{node: sectionNode, className: `${classes.date} ${classes.range}`}
-			]): tools.addClass([{node: sectionNode, className: classes.date}]);
-		el.addEventListener('focus', function(e) {
-			let panels = sectionObj.panels,
-				dates = isRange ? (function() {
-					let temps = [];
-					panels.length ? (function() {
-						panels.forEach((panel) => {
-							temps.push(panel.date);
-						});
-					}()) : (function() {
-						let now = new Date(),
-							next = new Date(),
-							{year, month} = tools.getYMD(now);
-
-						if (month === 12) {
-							next.setFullYear(year + 1);
-							next.setMonth(1);
-						} else {
-							next.setMonth(month);
-						}
-						temps = [now, next];
-					}());
-					return temps;
-				}()) : (panels.length ? [panels[0].date] : [new Date()]);
-
-			if (sectionObj.status === 'off') {
-				let isExistPanel = panels.length > 0;
-				tools.removeClass(sectionNode, classes.none);
-				dates.forEach((date, index) => {
-					sectionObj.isRange = isRange ? true : false;
-					let panel = new Panel(index, el, settings, date, sectionNode, sectionObj);
-					panel.init();
-					isExistPanel ? sectionNode.replaceChild(panel.panel, panels.shift().panel) : 
-						tools.appendChild([{node: sectionNode, childs: panel.panel}]);
-					panels.push(panel);
-				});
-				sectionObj.status = 'on';
-				!isExistPanel ? doc.body.appendChild(sectionNode) : '';
-			}
-		});
-		document.addEventListener('click', function(e) {
-			e.stopPropagation();
-			let elNodeName = String(el.nodeName).toLowerCase(),
-				target = e.target,
-				paths = e.path,
-				isClose = true,
-				targetNodeName = String(target.nodeName).toLowerCase();
-
-			if (targetNodeName !== elNodeName && sectionObj.panels.length) {
-				for (let index = paths.length; index--;) {
-					let node = paths[index];
-					if (node) {
-						if (String(node.nodeName).toLowerCase() === 'section' && 
-							String(node.className).indexOf(classes.date) >= 0) {
-							isClose = false;
-							break;
-						}
-					}
+	Section.prototype = {
+		init: function() {
+			const { type, value } = this.$parent.settings;
+			const isRange = type === 'daterange';
+			this.isRange = isRange;
+			const sectionNode = doc.createElement('section');
+			const className = isRange ? `${classes.date} ${classes.range}` : classes.date;
+			tools.addClass([
+				{
+					node: sectionNode,
+					className
 				}
-				if (isClose) {
-					tools.hiddenSection(sectionNode);
-					sectionObj.status = 'off';
+			]);
+			this.sectionNode = sectionNode;
+			const now = value ? value : new Date();
+			const dates = this.dates.length ? this.dates : isRange ? [now, now] : [now];
+			let panels = [];
+			dates && dates.forEach((date, i) => {
+				const panel = new Panel(this, i, date);
+				panels.push(panel);
+			}, this);
+			this.panels = panels;
+			panels = panels.map(item => item.panelNode);
+			tools.appendChild([
+				{
+					node: sectionNode,
+					childs: panels
 				}
-			}
-		});
+			]);
+		},
+		open: function() {
+			this.status = true;
+			tools.removeClass(this.sectionNode, classes.none);
+		},
+		close: function() {
+			this.status = false;
+			tools.addClass([
+				{
+					node: this.sectionNode, 
+					className: classes.none
+				}
+			]);
+		}
 	};
 
-	root.sdate = new SDate();
+	// 面板对象
+	const Panel = function($parent, id, currentDate) {
+		this.$parent = $parent;
+		this.id = id;
+		this.currentDate = currentDate;
+		this.panelNode = null;
+		this.navArea = null;
+		this.contentArea = null;
+		this.init();
+	};
+
+	Panel.prototype = {
+		init: function() {
+			// 构建面板
+			tools.createDateView.call(this);
+			tools.createPanel.call(this);
+
+			// 事件处理
+			tools.handleHeaderEvents(this);
+			tools.handleContentEvents(this);
+		},
+		changeCurrentDate: function(date) {
+			this.currentDate = date;
+		}
+	};
+
+	root.SDate = SDate;
 })(window);

@@ -7,12 +7,14 @@
 	<link rel="stylesheet" type="text/css" href="./css/date.css">
 </head>
 <body>
-	<input id="test" type="text">
-	<script type="text/javascript" src="./js/date.js"></script>
-	<script type="text/javascript">
-		sdate.render({
-			el: '#test',
-			range: false
+	<input id="test" type="text" placeholder="请选择日期">
+	<script src="./js/date.js"></script>
+	<script>
+		new SDate({ 
+			el: '#test', 
+			type: 'date',
+			start: new Date(2018, 9, 10),
+			end: new Date(2018, 10, 20)
 		});
 	</script>
 </body>
