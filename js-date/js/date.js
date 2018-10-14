@@ -170,6 +170,14 @@
 		return result;
 	};
 
+	// 判断是否是先相连时间段
+	tools.isNextMonth = function(next, old) {
+		if (!next && !old) return false;
+		const { year, month } = tools.getYMD(next);
+		const { year: oldYear, month: oldMonth } = tools.getYMD(old);
+		return year === oldYear && month === oldMonth;
+	};
+
 	// 判断平闰年
 	tools.isLeaf = function(year) {
 		return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
@@ -352,8 +360,8 @@
 
 	// type date时内容区数据以及节点构建
 	tools.createDateContent = function(panel) {
-		const { currentDate } = panel;
-		const { year, month, day } = tools.getYMD(currentDate);
+		const { currentDates } = panel;
+		const { year, month, day } = tools.getYMD(currentDates[0]);
 		const [wkCells, cells] = tools.createCells({
 			year,
 			month,
@@ -378,7 +386,7 @@
 		const [[panelNode]] = tools.create('div*1');
 		const { isRange } = panel.$parent;
 		const className = isRange ? (
-			that.id > 0 ? `${classes.panel} ${classes.right}` : 
+			panel.id > 0 ? `${classes.panel} ${classes.right}` : 
 				`${classes.panel} ${classes.left}`
 			) : classes.panel;
 
@@ -443,10 +451,10 @@
 		const {
 			panelNode, 
 			navArea, 
-			currentDate, 
+			currentDates, 
 			contentArea
 		} = panel;
-		const { year, month } = tools.getYMD(currentDate);
+		const { year, month } = tools.getYMD(currentDates[0]);
 		panel.contentArea = new Content(panel, table, cells, cellNodes);
 		// 替换内容区
 		panelNode.replaceChild(table, contentArea.content);
@@ -464,33 +472,51 @@
 			monthLeftNode,
 			monthRightNode
 		} = panel.navArea;
+		const { isRange } = panel.$parent;
 
 		headerNode.addEventListener('click', function(e) {
 			e.stopPropagation();
 			const target = e.target;
 			if (target) {
 				let selectedDate = null;
-				const { currentDate } = panel;
-				const { year, month, day } = tools.getYMD(currentDate);
+				let selectedDateOfOtherPanel = null;
+				const { currentDates } = panel;
+				const { year, month, day } = tools.getYMD(currentDates[0]);
 				const isYL = yearLeftNode.contains(target);
 				const isYR = yearRightNode.contains(target);
 				const isML = monthLeftNode.contains(target);
 				const isMR = monthRightNode.contains(target);
 				
-				// 上月、下月切换
-				if (isML || isMR) {
-					const targetMonth = isML ? month - 2 : month;
-					selectedDate = new Date(year, targetMonth, day);
+				// 上月、上年切换
+				if (isML || isYL) {
+					const targetMonth = isML ? month - 2 : month - 1;
+					const targetYear = isYL ? year - 1 : year;
+					selectedDate = new Date(targetYear, targetMonth, day);
+					// 日期范围处理
+					if (isRange) {
+						selectedDateOfOtherPanel = new Date(targetYear, targetMonth + 1, day);
+					}
 				}
-				// 上年、下年切换
-				if (isYL || isYR) {
-					const targetYear = isYL ? year - 1 : year + 1;
-					selectedDate = new Date(targetYear, month - 1, day);
+				// 下月、下年
+				if (isMR || isYR) {
+					const targetMonth = isMR ? month : month - 1;
+					const targetYear = isYR ? year + 1 : year;
+					selectedDate = new Date(targetYear, targetMonth, day);
+					// 日期范围处理
+					if (isRange) {
+						selectedDateOfOtherPanel = new Date(targetYear, targetMonth - 1, day);
+					}
 				}
 				// 防止非切换区域的点击
 				if (isYL || isYR || isML || isMR) {
 					panel.changeCurrentDate(selectedDate);
 					tools.replaceContent(panel);
+					if (isRange && selectedDateOfOtherPanel) {
+						const { panels } = panel.$parent;
+						const targetPanel = panel.id === 0 ? panels[1] : panels[0];
+						targetPanel.changeCurrentDate(selectedDateOfOtherPanel);
+						tools.replaceContent(targetPanel);
+					}
 				}
 			}
 		});
@@ -504,13 +530,16 @@
 				cells,
 				content: contentNode
 			}, 
-			currentDate
+			currentDates
 		} = panel;
 		const sdate = section.$parent;
 		const { input: el, settings } = section.$parent;
 		const { format, type } = settings;
 		const { isRange } = section;
-		const { year, month } = tools.getYMD(currentDate);
+		const { year, month } = tools.getYMD(currentDates[0]);
+		let rangeDates = [];
+		// 输出选择值到输入框
+		const attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
 
 		contentNode.addEventListener('click', function(e) {
 			e.stopPropagation();
@@ -543,22 +572,36 @@
 					}
 					selectedDate = new Date(selectedYear, selectedMonth, value);
 				}
-
+				tools.addClass([
+					{
+						node: target,
+						className: classes.current
+					}
+				]);
 				if (!isRange) {
-					tools.addClass([
-						{
-							node: target,
-							className: classes.current
-						}
-					]);
-					// 输出选择值到输入框
-					let attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
 					el[attr] = tools.exports(selectedDate, format, type, isRange);
 					// 设置当前选择日期
 					sdate.setSelectedValue(selectedDate);
 					panel.changeCurrentDate(selectedDate);
 					// 关闭面板
 					section.close();
+				} else {
+					if (section.dates.length === 2) section.clear();
+					tools.addClass([
+						{
+							node: target,
+							className: classes.inRange
+						}
+					]);
+					rangeDates.push(selectedDate);
+					panel.changeCurrentDate(rangeDates);
+					sdate.setSelectedValue(rangeDates);
+
+					if (rangeDates.length === 2 || section.dates.length === 2) {
+						el[attr] = tools.exports(section.dates, format, type, isRange);
+						rangeDates = [];
+						section.close();
+					}
 				}
 			}
 		});
@@ -615,8 +658,12 @@
 
 	Nav.prototype = {
 		init: function() {
-			const { currentDate } = this.$parent;
-			const { year, month } = tools.getYMD(currentDate);
+			const { 
+				currentDates, 
+				id, 
+				$parent: section 
+			} = this.$parent;
+			const { year, month } = tools.getYMD(currentDates[0]);
 			const [
 				[headerNode, leftWrapper, middleWrapper, rightWrapper], 
 				[ylNode, mlNode, yNode, mNode, textYNode, textMNode, mrNode, yrNode], 
@@ -640,7 +687,7 @@
 			yearText.innerText = '年';
 			monthText.innerText = '月';
 
-			tools.appendChild([
+			const defaultNodes = [
 				{ node: ylNode, childs: ylIcon },
 				{ node: mlNode, childs: mlIcon },
 				{ node: yrNode, childs: yrIcon },
@@ -654,7 +701,18 @@
 					node: headerNode, 
 					childs: [leftWrapper, middleWrapper, rightWrapper]
 				}
-			]);
+			];
+			if (section.isRange) {
+				defaultNodes.splice(-1);
+				const childs = id === 0 
+													? [leftWrapper, middleWrapper] 
+													: [middleWrapper, rightWrapper];
+				defaultNodes.push({ 
+					node: headerNode, 
+					childs
+				});
+			}
+			tools.appendChild(defaultNodes);
 			this.yearNode = textYNode;
 			this.monthNode = textMNode;
 			this.yearLeftNode = ylNode;
@@ -765,10 +823,15 @@
 			]);
 			this.sectionNode = sectionNode;
 			const now = value ? value : new Date();
-			const dates = this.dates.length ? this.dates : isRange ? [now, now] : [now];
+			const { year, month, day } = tools.getYMD(now);
+			const dates = isRange ? [now, new Date(year, month, day)] : [now];
 			let panels = [];
 			dates && dates.forEach((date, i) => {
-				const panel = new Panel(this, i, date);
+				if (i === 1 && !tools.isNextMonth(date, dates[0])) {
+					const { year, month, day } = tools.getYMD(dates[0]);
+					date = new Date(year, month, day);
+				}
+				const panel = new Panel(this, i, [date]);
 				panels.push(panel);
 			}, this);
 			this.panels = panels;
@@ -792,6 +855,12 @@
 					className: classes.none
 				}
 			]);
+		},
+		setDates: function(dates) {
+			this.dates = dates;
+		},
+		clear: function() {
+			this.dates = [];
 		}
 	};
 
@@ -799,7 +868,7 @@
 	const Panel = function($parent, id, currentDate) {
 		this.$parent = $parent;
 		this.id = id;
-		this.currentDate = currentDate;
+		this.currentDates = currentDate;
 		this.panelNode = null;
 		this.navArea = null;
 		this.contentArea = null;
@@ -816,8 +885,9 @@
 			tools.handleHeaderEvents(this);
 			tools.handleContentEvents(this);
 		},
-		changeCurrentDate: function(date) {
-			this.currentDate = date;
+		changeCurrentDate: function(dates) {
+			dates = Array.isArray(dates) ? dates : [dates];
+			this.currentDates = dates;
 		}
 	};
 

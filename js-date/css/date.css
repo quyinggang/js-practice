@@ -29,6 +29,10 @@
 	transition: opacity .25s, transform .25s;
 }
 
+.date-range-picker {
+	width: 471px;
+}
+
 .date-range-picker > div {
 	display: inline-block;
 }
@@ -43,9 +47,21 @@
 
 .date-picker-panel .panel-header {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-start;
 	align-items: center;
 	margin: 20px 12px;
+}
+
+.date-range-picker .is-right .panel-header {
+	justify-content: flex-end;
+}
+
+.date-range-picker .panel-header .text-wrapper {
+	margin-left: 1em;
+}
+
+.date-range-picker .is-right .text-wrapper {
+	margin-right: 1em;
 }
 
 .panel-header .wrapper span {
