@@ -13,6 +13,45 @@
 	}
 }
 
+.input {
+	display: inline-block;
+	width: 180px;
+	position: relative;
+	font-size: 14px;
+}
+
+.input--large {
+	width: 250px;
+}
+
+.input__inner {
+	display: inline-block;
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	padding: 0 15px;
+	color: #606266;
+	font-size: inherit;
+	border: 1px solid #dcdfe6;
+	border-radius: 4px;
+	background: #fff;
+	box-sizing: border-box;
+	outline: none;
+	transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+}
+
+.input__inner:hover {
+	border-color: #c0c4cc
+}
+
+.input__inner:focus {
+	border-color: #409EFF;
+}
+
+.input__inner::-webkit-input-placeholder {
+	color: #c0c4cc;
+}
+
 .date-picker,
 .date-range-picker {
 	position: absolute;

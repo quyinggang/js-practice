@@ -27,7 +27,6 @@
 		dot: 'fa fa-circle',
 		today: 'today',
 		current: 'current',
-		active: 'active',
 		disabled: 'disabled',
 		normal: 'normal',
 		prevMonth: 'prev-month',
@@ -84,6 +83,18 @@
 	tools.removeClass = function(elem, className) {
 		if (!elem || !elem.nodeName) return;
 		elem.className = String(elem.className).replace(className, '');
+	};
+
+	// 复制date对象
+	tools.copyDate = function(date) {
+		date = date.slice();
+		const isArray = Array.isArray(date);
+		date = isArray ? date : [date];
+		date.map(item => {
+			const { year, month, day, hour, minutes, seconds } = tools.getYMD(item);
+			return new Date(year, month - 1, day, hour, minutes, seconds);
+		});
+		return isArray ? date : date[0];
 	};
 
 	// 节点添加
@@ -143,6 +154,17 @@
 		return nodes;
 	};
 
+	// 获取指定位置的td对应的cell在cells集合的下标
+	tools.getPosIndexOfCell = function(node) {
+		if (node.nodeType !== 1) return;
+		const dataIndex = node.getAttribute('data-index');
+		const pos = dataIndex.split('-');
+		return {
+			line: Number(pos[0]),
+			row: Number(pos[1])
+		};
+	};
+
 	// 获取年月日时分秒
 	tools.getYMD = function(date) {
 		if (!date) return {};
@@ -170,12 +192,24 @@
 		return result;
 	};
 
+	// 判断是否在指定时间点后
+	tools.isAfter = function(oldDate, newDate) {
+		return newDate.getTime() >= oldDate.getTime();
+	};
+
 	// 判断是否是先相连时间段
 	tools.isNextMonth = function(next, old) {
 		if (!next && !old) return false;
 		const { year, month } = tools.getYMD(next);
 		const { year: oldYear, month: oldMonth } = tools.getYMD(old);
 		return year === oldYear && month === oldMonth;
+	};
+
+	// 对应下个月的时间点
+	tools.nextMonth = function(date) {
+		if (!tools.isDate(date)) return;
+		const { year, month, day } = tools.getYMD(date);
+		return new Date(year, month, day);
 	};
 
 	// 判断平闰年
@@ -200,19 +234,14 @@
 	}
 	// 日期内容数据
 	tools.createCells = function(option, panel) {
-		// 当前选择日期
-		const selectedValue = panel.$parent.$parent.value;
-		const {
-			year: oldYear,
-			month: oldMonth,
-			day: oldDay
-		} = tools.getYMD(selectedValue);
 		// 当前面板日期
 		let { year, month } = option;
 		// 支持范围选择
 		const section = panel.$parent;
-		const { start, end } = section.$parent.settings;
-		// const { isRange, dates } = section;
+		const { settings: {start, end}, value} = section.$parent;
+		// 当前选择日期
+		const selectedValues= value.slice();
+		const { isRange } = section;
 		// 本月1号是周几
 		const dayInWeek = new Date(year, month - 1, 1).getDay();
 		const line = 6;
@@ -267,9 +296,25 @@
 
 				let cell = rows.pop();
 				// 处理已选择的对应日期高亮显示以及切换时非本月相同天情况
-				if (cell.isCurrentMonth === 0 && selectedValue) {
-					const isCurrentYM = year === oldYear && month === oldMonth;
-					cell.isActive = isCurrentYM && oldDay === cell.value ? true : false;
+				if (cell.isCurrentMonth === 0 && selectedValues.length) {
+					if (!isRange) {
+						const {year: oldYear, month: oldMonth, day: oldDay } = tools.getYMD(selectedValues[0]);
+						const isCurrentYM = year === oldYear && month === oldMonth;
+						cell.isActive = isCurrentYM && oldDay === cell.value ? true : false;
+					} else {
+						// 处理在范围内显示样式
+						const rangeStartTime= selectedValues[0].getTime();
+						const rangeEndTime = selectedValues[1].getTime();
+						const currentTime = new Date(year, month - 1, cell.value).getTime();
+						if (currentTime >= rangeStartTime && currentTime <= rangeEndTime) {
+							cell.isInRange = true;
+							cell.isActive = currentTime === rangeStartTime 
+																? true 
+																: currentTime === rangeEndTime 
+																		? true 
+																		: false;
+						}
+					}
 				}
 				// 现在时间特殊处理
 				if (tools.isToday(year, month, cell.value)) {
@@ -318,7 +363,8 @@
 			const cellTr = [];
 			for (let rw = 0; rw < length; rw++) {
 				const [[td]] = tools.create('td*1');
-				const { 
+				const {
+					isInRange,
 					isDisabled, 
 					isActive, 
 					isCurrentMonth, 
@@ -333,10 +379,12 @@
 					td.innerText = '今天';
 					tools.addClass([{node: td, className: classes.today}]);
 				}
+				// 处理日期范围的显示样式
+				isInRange ? tools.addClass([{node: td, className: classes.inRange}]) : null;
 				// 非范围时间点不可选择
-				isDisabled ? tools.addClass([{node: td, className: classes.disabled}]) : '';
+				isDisabled ? tools.addClass([{node: td, className: classes.disabled}]) : null;
 				// 选择时间点高亮显示处理
-				isActive? tools.addClass([{node: td, className: classes.current}]) : '';
+				isActive? tools.addClass([{node: td, className: classes.current}]) : null;
 				// 本月、上月、下月样式显示区别
 				isCurrentMonth === 0 ? tools.addClass([{
 					node: td, 
@@ -431,18 +479,20 @@
 	};
 
 	// 输出选择的日期
-	tools.exports = function(dates, format, type, isRange) {
+	tools.exports = function(sdate) {
+		const { settings: { type, format }, value } = sdate;
+		const isRange = type === 'daterange';
 		return isRange ? (function() {
 			let separtor = '~',
 				formatDates = [];
 
-			dates.forEach((date) => {
+			value.forEach((date) => {
 				if (date) {
 					formatDates.push(tools.handleExports(date, format, type));
 				}
 			});
-			return `${formatDates[0]}${separtor}${formatDates[1]}`;
-		}()) : tools.handleExports(dates, format, type);
+			return `${formatDates[0]} ${separtor} ${formatDates[1]}`;
+		}()) : tools.handleExports(value[0], format, type);
 	};
 
 	// 替换日期中的内容区域DOM以及相关对象
@@ -533,8 +583,7 @@
 			currentDates
 		} = panel;
 		const sdate = section.$parent;
-		const { input: el, settings } = section.$parent;
-		const { format, type } = settings;
+		const { input: el } = sdate;
 		const { isRange } = section;
 		const { year, month } = tools.getYMD(currentDates[0]);
 		let rangeDates = [];
@@ -554,6 +603,13 @@
 				position = position.split('-');
 				const targetCell = cells[Number(position[0])][Number(position[1])];
 				const { isCurrentMonth, value } = targetCell;
+
+				// 处理费本月点击的效果，目前不支持其点击
+				if (isRange && isCurrentMonth !== 0) {
+					return;
+				}
+				// 再次打开并选择，清空上次选择的值以及面板上选择的样式
+				isRange ? sdate.value.length === 2 ? sdate.clear() : null : sdate.clear();
 
 				targetCell.isActive = true;
 				// 选择非本月时间处理
@@ -578,14 +634,16 @@
 						className: classes.current
 					}
 				]);
+				// 同步当前选择日期
+				sdate.setSelectedValue(selectedDate);
 				if (!isRange) {
-					el[attr] = tools.exports(selectedDate, format, type, isRange);
-					// 设置当前选择日期
-					sdate.setSelectedValue(selectedDate);
+					// 同步当前panel面板的时间点
 					panel.changeCurrentDate(selectedDate);
+					el[attr] = tools.exports(sdate);
 					// 关闭面板
 					section.close();
 				} else {
+					// 处理上次选择的结果值
 					if (section.dates.length === 2) section.clear();
 					tools.addClass([
 						{
@@ -593,12 +651,16 @@
 							className: classes.inRange
 						}
 					]);
-					rangeDates.push(selectedDate);
+					// 处理后选时间大于先选时间
+					rangeDates.length 
+						? tools.isAfter(selectedDate, rangeDates[0]) 
+								? rangeDates.push(selectedDate)
+								: rangeDates.unshift(selectedDate)
+						: rangeDates.push(selectedDate);
 					panel.changeCurrentDate(rangeDates);
-					sdate.setSelectedValue(rangeDates);
-
-					if (rangeDates.length === 2 || section.dates.length === 2) {
-						el[attr] = tools.exports(section.dates, format, type, isRange);
+					// 范围选择时，只要选择两项则输出选则并关闭
+					if (sdate.value.length === 2) {
+						el[attr] = tools.exports(sdate);
 						rangeDates = [];
 						section.close();
 					}
@@ -757,7 +819,7 @@
 		this.settings = null;
 		this.input = null;
 		this.userConfig = config;
-		this.value = null;
+		this.value = [];
 		this.render();
 	};
 
@@ -781,7 +843,7 @@
 					that.isInit = false;
 					doc.body.appendChild(section.sectionNode);
 				} else {
-					panels.forEach(panel => {
+					panels.forEach((panel, i) => {
 						tools.replaceContent(panel)
 					});
 				}
@@ -793,11 +855,30 @@
 			});
 		},
 		setSelectedValue: function(date) {
-			this.value = date;
+			date = Array.isArray(date) ? date : [date];
+			let value = this.value;
+			if (value.length + date.length <= 2) {
+				this.value.splice(value.length, 1, ...date);
+			}
+			// 处理后选日期小于已选日期问题
+			this.value.sort((a, b) => a.getTime() - b.getTime());
+		},
+		// 已选择后，再次打开面板进行再次选择时清除相关样式和状态
+		clear: function() {
+			this.section.clearSelected();
+			this.value = [];
 		}
 	};
 
-	// 面板容器对象
+	/**
+	 * 面板容器对象
+	 * @param {*} $parent 
+	 * status       当前状态（true表示展开，false表示关闭）
+	 * panels       所有面板对象集合
+	 * dates        面板渲染的时间点
+	 * sectionNode  面板容器DOM节点
+	 * isRange      是否范围选择
+	 */
 	const Section = function($parent) {
 		this.$parent = $parent;
 		this.status = false;
@@ -859,12 +940,21 @@
 		setDates: function(dates) {
 			this.dates = dates;
 		},
-		clear: function() {
-			this.dates = [];
+		clearSelected: function() {
+			this.panels.forEach(panel => panel.clearSelected());
 		}
 	};
 
-	// 面板对象
+	/**
+	 * 面板对象
+	 * @param {*} $parent 
+	 * @param {*} id           
+	 * @param {*} currentDate 当前面板时间点
+	 * currentDates  当前面板根据该时间点渲染
+	 * panelNode     面板DOM
+	 * navArea       顶部区域对象
+	 * contentArea   内容区域对象
+	 */
 	const Panel = function($parent, id, currentDate) {
 		this.$parent = $parent;
 		this.id = id;
@@ -888,6 +978,20 @@
 		changeCurrentDate: function(dates) {
 			dates = Array.isArray(dates) ? dates : [dates];
 			this.currentDates = dates;
+		},
+		// 去除上一次选择的时间点active以及范围的样式
+		clearSelected: function() {
+			const { cells } = this.contentArea;
+			const targetQueryClass = !this.$parent.isRange ? classes.current : classes.inRange;
+			const nodes = this.panelNode.querySelectorAll(`.${targetQueryClass}`);
+			[...nodes].forEach(node => {
+				const { line, row } = tools.getPosIndexOfCell(node);
+				const cell = cells[line][row];
+				cell.isActive = false;
+				cell.isInRange = false;
+				tools.removeClass(node, classes.current);
+				tools.removeClass(node, classes.inRange);
+			});
 		}
 	};
 

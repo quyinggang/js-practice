@@ -7,9 +7,18 @@
 	<link rel="stylesheet" type="text/css" href="./css/date.css">
 </head>
 <body>
-	<input id="test" type="text" placeholder="请选择日期">
+	<div class="input input--large">
+		<input
+			id="test"
+			class="input__inner"
+			type="text"
+			name="input"
+			placeholder="请选择日期"
+			readonly>
+	</div>
 	<script src="./js/date.js"></script>
 	<script>
+		// type: date（日期选择） | daterange（日期范围选择）
 		new SDate({ 
 			el: '#test', 
 			type: 'date'
