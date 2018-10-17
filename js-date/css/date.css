@@ -154,8 +154,7 @@
 	cursor: default;
 }
 
-
-.panel-content tr:not(:first-child) td:not(.current):hover {
+.panel-content tr td.normal:not(.is-in-range):hover {
 	background: #e4e8f1;
 }
 

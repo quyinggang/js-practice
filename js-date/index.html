@@ -18,10 +18,14 @@
 	</div>
 	<script src="./js/date.js"></script>
 	<script>
-		// type: date（日期选择） | daterange（日期范围选择）
+		/*
+			type: date（日期选择） | daterange（日期范围选择）
+			start: new Date() 可选日期范围-开始时间点
+			end: new Date()   可选日期范围-结束时间点
+		*/
 		new SDate({ 
 			el: '#test', 
-			type: 'date'
+			type: 'daterange'
 		});
 	</script>
 </body>

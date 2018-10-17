@@ -54,6 +54,7 @@
 
 	// class是否存在
 	tools.isExistClass = function(className, target) {
+		if (!className) return;
 		return className.indexOf(target) >= 0;
 	}
 
@@ -303,8 +304,8 @@
 						cell.isActive = isCurrentYM && oldDay === cell.value ? true : false;
 					} else {
 						// 处理在范围内显示样式
-						const rangeStartTime= selectedValues[0].getTime();
-						const rangeEndTime = selectedValues[1].getTime();
+						const rangeStartTime= selectedValues[0] && selectedValues[0].getTime();
+						const rangeEndTime = selectedValues[1] && selectedValues[1].getTime();
 						const currentTime = new Date(year, month - 1, cell.value).getTime();
 						if (currentTime >= rangeStartTime && currentTime <= rangeEndTime) {
 							cell.isInRange = true;
@@ -408,8 +409,8 @@
 
 	// type date时内容区数据以及节点构建
 	tools.createDateContent = function(panel) {
-		const { currentDates } = panel;
-		const { year, month, day } = tools.getYMD(currentDates[0]);
+		const { initDate } = panel;
+		const { year, month, day } = tools.getYMD(initDate);
 		const [wkCells, cells] = tools.createCells({
 			year,
 			month,
@@ -501,10 +502,10 @@
 		const {
 			panelNode, 
 			navArea, 
-			currentDates, 
+			initDate, 
 			contentArea
 		} = panel;
-		const { year, month } = tools.getYMD(currentDates[0]);
+		const { year, month } = tools.getYMD(initDate);
 		panel.contentArea = new Content(panel, table, cells, cellNodes);
 		// 替换内容区
 		panelNode.replaceChild(table, contentArea.content);
@@ -530,8 +531,8 @@
 			if (target) {
 				let selectedDate = null;
 				let selectedDateOfOtherPanel = null;
-				const { currentDates } = panel;
-				const { year, month, day } = tools.getYMD(currentDates[0]);
+				const { initDate } = panel;
+				const { year, month, day } = tools.getYMD(initDate);
 				const isYL = yearLeftNode.contains(target);
 				const isYR = yearRightNode.contains(target);
 				const isML = monthLeftNode.contains(target);
@@ -580,16 +581,17 @@
 				cells,
 				content: contentNode
 			}, 
-			currentDates
+			initDate
 		} = panel;
 		const sdate = section.$parent;
 		const { input: el } = sdate;
 		const { isRange } = section;
-		const { year, month } = tools.getYMD(currentDates[0]);
+		const { year, month } = tools.getYMD(initDate);
 		let rangeDates = [];
 		// 输出选择值到输入框
 		const attr = String(el.nodeName).toLowerCase() === 'input' ? 'value' : 'innerText';
 
+		// 内容区域点击
 		contentNode.addEventListener('click', function(e) {
 			e.stopPropagation();
 			const target = e.target;
@@ -605,9 +607,8 @@
 				const { isCurrentMonth, value } = targetCell;
 
 				// 处理费本月点击的效果，目前不支持其点击
-				if (isRange && isCurrentMonth !== 0) {
-					return;
-				}
+				if (isRange && isCurrentMonth !== 0) return;
+
 				// 再次打开并选择，清空上次选择的值以及面板上选择的样式
 				isRange ? sdate.value.length === 2 ? sdate.clear() : null : sdate.clear();
 
@@ -657,7 +658,7 @@
 								? rangeDates.push(selectedDate)
 								: rangeDates.unshift(selectedDate)
 						: rangeDates.push(selectedDate);
-					panel.changeCurrentDate(rangeDates);
+					panel.changeCurrentDate(selectedDate);
 					// 范围选择时，只要选择两项则输出选则并关闭
 					if (sdate.value.length === 2) {
 						el[attr] = tools.exports(sdate);
@@ -721,11 +722,11 @@
 	Nav.prototype = {
 		init: function() {
 			const { 
-				currentDates, 
+				initDate, 
 				id, 
 				$parent: section 
 			} = this.$parent;
-			const { year, month } = tools.getYMD(currentDates[0]);
+			const { year, month } = tools.getYMD(initDate);
 			const [
 				[headerNode, leftWrapper, middleWrapper, rightWrapper], 
 				[ylNode, mlNode, yNode, mNode, textYNode, textMNode, mrNode, yrNode], 
@@ -843,8 +844,12 @@
 					that.isInit = false;
 					doc.body.appendChild(section.sectionNode);
 				} else {
+					// 处理选择后切换上年上月等面板电视问题（初始化面板渲染时间点）
+					const { year, month } = tools.getYMD(that.value[0]);
+					const values = [new Date(year, month - 1, 1), new Date(year, month, 1)];
 					panels.forEach((panel, i) => {
-						tools.replaceContent(panel)
+						panel.changeCurrentDate(values[i]);
+						tools.replaceContent(panel);
 					});
 				}
 			});
@@ -866,6 +871,9 @@
 		// 已选择后，再次打开面板进行再次选择时清除相关样式和状态
 		clear: function() {
 			this.section.clearSelected();
+			this.clearValue();
+		},
+		clearValue: function() {
 			this.value = [];
 		}
 	};
@@ -912,7 +920,7 @@
 					const { year, month, day } = tools.getYMD(dates[0]);
 					date = new Date(year, month, day);
 				}
-				const panel = new Panel(this, i, [date]);
+				const panel = new Panel(this, i, date);
 				panels.push(panel);
 			}, this);
 			this.panels = panels;
@@ -929,6 +937,7 @@
 			tools.removeClass(this.sectionNode, classes.none);
 		},
 		close: function() {
+			this.checkValueBeforeClose();
 			this.status = false;
 			tools.addClass([
 				{
@@ -942,6 +951,11 @@
 		},
 		clearSelected: function() {
 			this.panels.forEach(panel => panel.clearSelected());
+		},
+		checkValueBeforeClose: function() {
+			if (!this.isRange) return;
+			const sdate = this.$parent;
+			if (sdate.value.length !== 2) sdate.clearValue();
 		}
 	};
 
@@ -950,7 +964,7 @@
 	 * @param {*} $parent 
 	 * @param {*} id           
 	 * @param {*} currentDate 当前面板时间点
-	 * currentDates  当前面板根据该时间点渲染
+	 * initDate  当前面板根据该时间点渲染
 	 * panelNode     面板DOM
 	 * navArea       顶部区域对象
 	 * contentArea   内容区域对象
@@ -958,7 +972,7 @@
 	const Panel = function($parent, id, currentDate) {
 		this.$parent = $parent;
 		this.id = id;
-		this.currentDates = currentDate;
+		this.initDate = currentDate;
 		this.panelNode = null;
 		this.navArea = null;
 		this.contentArea = null;
@@ -975,9 +989,8 @@
 			tools.handleHeaderEvents(this);
 			tools.handleContentEvents(this);
 		},
-		changeCurrentDate: function(dates) {
-			dates = Array.isArray(dates) ? dates : [dates];
-			this.currentDates = dates;
+		changeCurrentDate: function(date) {
+			this.initDate = date;
 		},
 		// 去除上一次选择的时间点active以及范围的样式
 		clearSelected: function() {
