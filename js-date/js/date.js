@@ -66,18 +66,14 @@
 
 	// class添加
 	tools.addClass = function(classes) {
-		if (Array.isArray(classes)) {
-			classes.forEach((item) => {
-				if (item) {
-					let {node, className} = item;
-					if (node) {
-						if (String(node.className).indexOf(className) < 0) {
-							node.className = String(node.className + ' ' + className).trim();
-						}
-					}
-				}
-			})
-		}
+		if (!Array.isArray(classes)) return;
+		classes.forEach((item) => {
+			let { node, className } = item || {};
+			if (!node) return;
+			if (String(node.className).indexOf(className) < 0) {
+				node.className = String(node.className + ' ' + className).trim();
+			}
+		});
 	};
 
 	// 移除class
@@ -100,18 +96,17 @@
 
 	// 节点添加
 	tools.appendChild = function(nodes) {
-		if (Array.isArray(nodes)) {
-			nodes.forEach((item) => {
-				let {node, childs} = item;
-				if (Array.isArray(childs)) {
-					childs.forEach((child) => {
-						child ? node.appendChild(child) : '';
-					});
-				} else {
-					node.appendChild(childs);
-				}
-			});
-		}
+		if (!Array.isArray(nodes)) return;
+		nodes.forEach((item) => {
+			let {node, childs} = item;
+			if (Array.isArray(childs)) {
+				childs.forEach((child) => {
+					child ? node.appendChild(child) : '';
+				});
+			} else {
+				node.appendChild(childs);
+			}
+		});
 	};
 
 	// 参数合并
@@ -220,19 +215,25 @@
 
 	// 获取指定月天数
 	tools.getDaysOfMonth = function(month, year) {
-		return  monthOf31s.includes(month) ? 31 : 
-			(month !== 2 ? 30 : (tools.isLeaf(year) ? 28 : 29));
+		return  monthOf31s.includes(month)
+							? 31
+							: month !== 2 
+									? 30
+									: tools.isLeaf(year)
+											? 28
+											: 29;
 	};
 
 	// 判断是否是今天
 	tools.isToday = function(year, month, day) {
-		let now = new Date(),
-			curYear = now.getFullYear(),
-			curMonth = now.getMonth() + 1,
-			curDay = now.getDate();
+		const now = new Date();
+		const curYear = now.getFullYear();
+		const curMonth = now.getMonth() + 1;
+		const curDay = now.getDate();
 
 		return year === curYear && month === curMonth && day === curDay;
 	}
+	
 	// 日期内容数据
 	tools.createCells = function(option, panel) {
 		// 当前面板日期
