@@ -37,7 +37,7 @@
       if (!node || !('nodeType' in node)) return;
       node.className = String(node.className).replace(className, '').trim();
     },
-    // 处理固定列时同行hover效果
+    // 处理固定列时（多table）同行hover效果
     bindTREvents: function(targetTrs, otherTrs) {
       if (!Array.isArray(targetTrs)) return;
       const targetClass = 'hover-tr';
@@ -80,6 +80,7 @@
     this.columns = columns;
     this.tableIndex = tableIndex++;
     this.table = new Table(this, 0);
+    // 固定内容Table对象
     this.fixedTable = new Table(this, 1);
     this.tableWrapper = null;
     this.fixedBodyWidth = null;
@@ -90,12 +91,14 @@
     init: function() {
       const { table: { headerTable, bodyTable }, fixedTable, config } = this;
       const tableDOM = tools.createEle('div', 'table');
-      if ('border' in config) {
-        tools.addClass(tableDOM, 'is-border');
-      }
+      // 是否显示边框
+      if ('border' in config) tools.addClass(tableDOM, 'is-border');
+      // 内容区高度是否固定
       if ('height' in config) {
         tableDOM.style.height = `${config.height}px`;
       }
+
+      // Table区域DOM构建
       const fixedTableDOM = tools.createEle('div', 'table__fixed-wrapper');
       fixedTable && tools.append(fixedTableDOM, [
         fixedTable.headerTable.tableDOM, 
@@ -129,14 +132,16 @@
         tools.bindTREvents(trsOfFixedTable, trsOfTable);
         tools.bindTREvents(trsOfTable, trsOfFixedTable);
 
-        // 保证内容区滚动时表头或固定列同步滚动
+        // 保证内容区滚动时表头和固定列同步滚动
         tableBodyDOM.addEventListener('scroll', function() {
           let scrollLeft = this.scrollLeft;
           let scrollTop = this.scrollTop;
           const targetClass = scrollLeft ? 'is-scroll-x' : scrollTop ? 'is-scroll-y' : '';
           tools.addClass(that.tableWrapper, targetClass);
+          // 同步滚动
           headerTableDOM.scrollLeft = scrollLeft;
           fixedTableBodyDOM.scrollTop = scrollTop;
+          // 处理快速滚动时问题
           if (scrollLeft < 5) {
             tools.removeClass(that.tableWrapper, targetClass);
           }
@@ -148,6 +153,7 @@
         let fixedBodyWidth = 0;
         const fixedTableDOM = this.fixedTable.wrapper;
         const columns = this.columns;
+        // 支持自定义列的宽度，固定时需要获取对应列的宽度
         columns.forEach(column => {
           if (column.fixed) {
             fixedBodyWidth += parseInt(column.width || 80, 10);
@@ -194,6 +200,11 @@
     }
   };
 
+  /**
+   * Table对象
+   * @param {*} $parent 
+   * @param {*} type  用于区分是否是固定列
+   */
   const Table = function($parent, type) {
     this.$parent = $parent;
     this.type = type;
@@ -209,9 +220,14 @@
     }
   };
 
+  /**
+   * 表头区域对象
+   * @param {*} $parent 
+   */
   const HeaderTable = function($parent) {
     this.$parent = $parent;
     this.tableDOM = null;
+    // colgroup对象用于控制列的宽度
     this.colgroup = new ColGroup($parent.$parent);
     this.init();
   };
@@ -219,7 +235,6 @@
   HeaderTable.prototype = {
     init: function() {
       const { createEle, append } = tools;
-      const fixedValue = ['left', 'right'];
       const tableDOM = createEle('div', 'table__header-wrapper');
       const table = tools.createTable('table__header');
       const thead = createEle('thead');
@@ -247,6 +262,10 @@
     }
   };
 
+  /**
+   * 表格内容区域对象
+   * @param {*} $parent 
+   */
   const BodyTable = function($parent) {
     this.$parent = $parent;
     this.tableDOM = null;
@@ -275,6 +294,7 @@
           const td = createEle('td');
           const cell = createEle('div', 'cell');
           const innerText = item[column.prop] || '';
+          // 如果存在fixed属性
           cell.innerText = 'fixed' in column ? (type ? innerText : '') : innerText;
           if (type && !('fixed' in column)) tools.addClass(td, 'is-hidden');
           append(td, cell);

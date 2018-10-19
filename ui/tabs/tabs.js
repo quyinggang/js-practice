@@ -1,9 +1,8 @@
 ;(function(root) {
-  let tabs = null;
+
   const classes = {
     active: 'is-active'
   };
-  const navsWidth = {};
   const on = tools.on;
   const addClass = tools.addClass;
   const removeClass = tools.removeClass;
@@ -29,8 +28,8 @@
       this.tabs = [...header.children[1].children].map((item, index) => {
         const width = item.offsetWidth;
         widthMap[index] = width;
-        return new TabItem(index, item, width, !index ? true : false);
-      });
+        return new TabItem(this, index, item, width, !index ? true : false);
+      }, this);
       this.widthMap = widthMap;
       this.panels = [...content.children];
       const defaultNav = this.tabs[0];
@@ -40,7 +39,8 @@
     }
   };
 
-  const TabItem = function(index, dom, width, isCurrent) {
+  const TabItem = function($parent, index, dom, width, isCurrent) {
+    this.$parent = $parent;
     this.index = index;
     this.dom = dom;
     this.width = width || 0;
@@ -55,7 +55,7 @@
         'click': function(event) {
           event.stopPropagation();
           const { index } = that;
-          const { navBar, panels, widthMap } = tabs;
+          const { navBar, panels, widthMap } = that.$parent;
           that.reset();
           addClass(this, classes.active);
           addClass(panels[index], classes.active);
@@ -68,7 +68,7 @@
       });
     },
     reset: function() {
-      const { tabs: navs, panels } = tabs;
+      const { tabs: navs, panels } = this.$parent;
       const index = this.index;
       navs.forEach((nav, i) => {
         if (i !== index) {
@@ -83,5 +83,5 @@
     }
   };
   
-  tabs = new Tabs();
+  new Tabs();
 })(window);
