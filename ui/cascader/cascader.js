@@ -1,5 +1,4 @@
-;
-(function(root) {
+;(function(root) {
     const classes = {
         active: 'active',
         isFocus: 'is-focus',
@@ -13,6 +12,7 @@
         children: [{
             value: 'shejiyuanze',
             label: '设计原则',
+            isDisabled: true,
             children: [{
                 value: 'yizhi',
                 label: '一致'
@@ -357,7 +357,6 @@
 
     Panel.prototype = {
         createPanel: function() {
-            const that = this.parent;
             const doc = document;
             const panel = doc.createElement('div');
             const arrow = doc.createElement('div');
@@ -422,6 +421,8 @@
      *     menu：DOM对象
      *     menuOptions： Option对象集合
      *     level：当前menu层次
+     *     currentOption：当前menu对应的option
+     *     options：用户传递的options数据
      */
     const PanelMenu = function(parent, options, index) {
         this.id = index;
@@ -445,7 +446,7 @@
                     value: item.value,
                     index: i,
                     isLast: !!!item.children,
-                    disbaled: true
+                    isDisabled: item.isDisabled
                 };
                 const option = new Option(params);
                 this.menuOptions.push(option);
@@ -475,13 +476,13 @@
             value,
             index,
             isLast,
-            disabled
+            isDisabled,
         } = params;
         this.$parent = parent;
         this.option = null;
         this.label = label;
         this.value = value;
-        this.disabled = !!disabled;
+        this.isDisabled = !!isDisabled;
         this.index = index;
         this.isLast = isLast || false;
         this.create();
@@ -493,13 +494,21 @@
             const liNode = document.createElement('li');
             addClass(liNode, 'item');
             liNode.innerText = this.label;
+            if (!this.isLast) {
+                const iconNode = document.createElement('i');
+                addClass(iconNode, 'fa fa-caret-right is-right');
+                liNode.appendChild(iconNode);
+            }
+            this.isDisabled && addClass(liNode, 'is-disabled');
             this.option = liNode;
         },
         on: function() {
-            const { option, $parent, label, value, index, isLast } = this;
+            const { option, $parent, label, value, index, isLast, isDisabled } = this;
             const panel = this.getPanel();
             on(option, {
                 'click': function() {
+                    // 支持禁用选项
+                    if (isDisabled) return;
                     addClass(this, classes.active);
                     $parent.currentOption = { label, value, index, isLast };
                     $parent.resetCurrentSelect(index);
