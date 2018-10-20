@@ -1,0 +1,79 @@
+.transfer {
+  display: flex;
+  align-items: center;
+  height: 320px;
+  width: 500px;
+  user-select: none;
+}
+
+.transfer-panel {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  border: 1px solid #d1dbe5;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,.12), 0 0 6px rgba(0,0,0,.04);
+  box-sizing: border-box;
+}
+
+.transfer__btns {
+  display: inline-block;
+  margin: 0 20px;
+}
+
+.transfer__btns .btn {
+  margin: 0;
+  padding: 0;
+  padding: 5px 20px;
+}
+
+.transfer__btns .btn:first-child {
+  margin-bottom: 10px;
+}
+
+.transfer-panel .panel__header,
+.transfer-panel .panel__footer {
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  padding-left: 20px;
+  background: #fbfdff;
+  box-sizing: border-box;
+  color: #1f2d3d;
+  font-size: 14px;
+}
+
+.transfer-panel .panel__header {
+  border-bottom: 1px solid #d1dbe5;
+}
+
+.transfer-panel .panel__body {
+  height: 248px;
+  margin: 0;
+  padding: 0;
+  padding: 10px 0;
+  box-sizing: border-box;
+  list-style: none;
+  overflow: auto;
+}
+
+.panel__body .item {
+  display: block;
+  height: 32px;
+  line-height: 32px;
+  padding-left: 20px;
+  color: #48576a;
+  cursor: pointer;
+}
+
+.panel__body .item:hover {
+  background: #ddd;
+}
+
+.transfer-panel .panel__footer {
+  border-top: 1px solid #d1dbe5;
+}
+
+.transfer-panel .panel__footer .footer__label {
+  color: #8391a5;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Transfer</title>
+  <link rel="stylesheet" type="text/css" href="../common/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="../common/common.css">
+  <link rel="stylesheet" type="text/css" href="../button/button.css">
+  <link rel="stylesheet" type="text/css" href="../checkbox/checkbox.css">
+  <link rel="stylesheet" type="text/css" href="./transfer.css">
+</head>
+<body>
+  <script src="../common/common.js"></script>
+  <script src="../checkbox/checkbox.js"></script>
+  <script src="./transfer.js"></script>
+  <script>
+    const generateData2 = function() {
+      const data = [];
+      const cities = ['上海', '北京', '广州', '深圳', '南京', '西安', '成都', '武汉', '杭州'];
+      cities.forEach((city, index) => {
+        data.push({
+          label: city,
+          key: index
+        });
+      });
+      return data;
+    };
+    new Transfer(generateData2());
+  </script>
+</body>
+</html>

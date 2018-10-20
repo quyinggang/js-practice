@@ -71,7 +71,7 @@
 .select-dropdown__list {
   margin: 0;
   padding: 0;
-  padding: 20px 0;
+  padding: 10px 0;
   list-style: none;
   user-select: none;
 }
@@ -80,7 +80,7 @@
   height: 34px;
   line-height: 34px;
   padding: 0 20px;
-  color: #606266;
+  color: #48576a;
   font-size: 14px;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -89,14 +89,14 @@
   cursor: pointer;
 }
 
-.select-dropdown .item:hover {
-  background: #f5f7fa;
+.select-dropdown .item:not(.active):hover {
+  background: #e4e8f1;
 }
 
 .select-dropdown .active {
-  color: #409eff;
+  color: #fff;
+  background-color: #20a0ff;
 }
-
 
 .select-dropdown .arrow {
   width: 10px;

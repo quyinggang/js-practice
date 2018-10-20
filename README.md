@@ -53,7 +53,8 @@ JavaScript实践案例
 ![carousel](./images/carousel.png)  
 
 **scrollbar**    
-![scrollbar](./images/scrollbar.png)      
+![scrollbar](./images/scrollbar.png)   
+
 **select**    
 ![select](./images/select.png)   
 
@@ -76,7 +77,10 @@ JavaScript实践案例
 
 **Cascader**   
 > 级联选择器    
-![cascader](./images/cascader.gif)            
+![cascader](./images/cascader.gif)    
+
+**Transfer**   
+![transfer](./images/transfer.png)    
 
 #### 音乐播放器
 
