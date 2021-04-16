@@ -7,8 +7,6 @@
   }
 
   /**
-   * 简易固定高度虚拟列表，用于启发思路
-   * 
    * itemHeight：列表项高度
    * viibleCount: 可见列表数量
    * @returns 
