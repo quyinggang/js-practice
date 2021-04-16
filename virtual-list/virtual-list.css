@@ -1,0 +1,16 @@
+#list {
+  position: relative;
+  overflow: auto;
+  border: 1px solid #aaa;
+}
+
+#list-scroll {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.list-item {
+  color: #666;
+  text-align: center;
+}
