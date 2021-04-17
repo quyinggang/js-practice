@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片懒加载</title>
+  <link rel="stylesheet" href="./lazy-load.css">
+</head>
+<body>
+  <div class="container">
+    <ul id="image-viewport">
+      <li class="img-container">
+        <img
+          class="img fade-in lazyload"
+          data-src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg31.51tietu.net%2Fpic%2F2016-120904%2F20161209044933ftnntwnxneo106660.jpg&refer=http%3A%2F%2Fimg31.51tietu.net&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621231867&t=0f0185eb84f9ba2371640580e8170f3d"
+        >
+      </li>
+      <li class="img-container">
+        <img
+          class="img fade-in lazyload"
+          data-src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2Fe22c814f63395c7d38542990666aa271de18f9a3.jpg&refer=http%3A%2F%2Fi0.hdslb.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621233160&t=2b6a93a76abebfbcab7d85e9701ebb7f"
+        >
+      </li>
+      <li class="img-container">
+        <img
+          class="img fade-in lazyload"
+          data-src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201809%2F25%2F2018092585252_AXtxv.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621233318&t=18e7e4a3cbf5d1a5a647864f48dab27e"
+        >
+      </li>
+      <li class="img-container">
+        <img
+          class="img fade-in lazyload"
+          data-src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201809%2F25%2F2018092585218_hcWAm.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621233318&t=ca84cdd10ae0a889f84a0fee854e9b3b"
+        >
+      </li>
+      <li class="img-container">
+        <img
+          class="img fade-in lazyload"
+          data-src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201809%2F25%2F2018092585240_RsSVj.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621233318&t=5f03b65b48dabddab37743efc7603429"
+        >
+      </li>
+    </ul>
+  </div>
+  <script src="./lazy-load.js"></script>
+  <script>
+    new LazyLoad({
+      root: document.getElementById('image-viewport')
+    })
+  </script>
+</body>
+</html>
