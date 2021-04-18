@@ -54,7 +54,7 @@
       const { images, settings: { loadedClass }} = this;
       window.requestAnimationFrame(() => {
         // 简单处理下垂直方向，不考虑水平方向以及全局滚动情况
-        images.forEach((item, i) => {
+        images.forEach(item => {
           if (item.className.indexOf(loadedClass) !== -1) return;
           const { top } = item.getBoundingClientRect();
           // 注册scroll事件的容器底部与每一个元素的顶部距离做比较，当元素出现在可视区域内必然小于rootBottom
