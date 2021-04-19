@@ -24,6 +24,12 @@
     left: canvasLeft
    } = canvasNode.getBoundingClientRect();
 
+  const shapeStatus = {
+    isDraggingInCanvas: false,
+    isSelected: false,
+    isDraggingFromSide: false
+  };
+
   // 图像绘制到画布上的初始尺寸
   const SHAPE_SIZE = {
     RECT: {
@@ -135,6 +141,7 @@
    */
   function createShadowShape(shapeNode) {
     if (!isSVGElement(shapeNode)) return;
+    shapeStatus.isSelected = true;
     const imageHalfSize = 9;
     const shadowShapeOutline = createShapeOutline(shapeNode);
     const { x, y, width, height } = getShapePositionAndSize(shapeNode);
@@ -206,10 +213,38 @@
     })
   }
 
-  function handleGraphGrag() {
+  function createLineConnectShape(shapeNode) {
+    if (!shapeNode) return;
+    const imageHalfSize = 2.5;
+    const { x, y, width, height } = getShapePositionAndSize(shapeNode);
+    const points = {
+      'top-left': [x - imageHalfSize, y - imageHalfSize],
+      'top-mid': [x + (width / 2) - imageHalfSize, y - imageHalfSize],
+      'top-right': [x + width - imageHalfSize, y - imageHalfSize],
+      'mid-left': [x - imageHalfSize, y + height / 2 - imageHalfSize],
+      'mid-right': [x + width - imageHalfSize, y + height / 2 - imageHalfSize],
+      'bottom-left': [x - imageHalfSize, y + height - imageHalfSize],
+      'bottom-mid': [x + width / 2 - imageHalfSize, y + height - imageHalfSize],
+      'bottom-right': [x + width - imageHalfSize, y + height - imageHalfSize]
+    };
+    lineConnectGNode.innerHTML = '';
+    for (let value of Object.values(points)) {
+      const pointGNode = createSVGElement('g');
+      const image = createSVGElement('image');
+      image.href.baseVal = 'data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI1cHgiIGhlaWdodD0iNXB4IiB2ZXJzaW9uPSIxLjEiPjxwYXRoIGQ9Im0gMCAwIEwgNSA1IE0gMCA1IEwgNSAwIiBzdHJva2U9IiMyOWI2ZjIiLz48L3N2Zz4=';
+      image.setAttribute('x', value[0]);
+      image.setAttribute('y', value[1]);
+      image.setAttribute('width', imageHalfSize * 2);
+      image.setAttribute('height', imageHalfSize * 2);
+      pointGNode.appendChild(image);
+      lineConnectGNode.appendChild(pointGNode);
+    }
+  }
+
+
+  function handleSideIconGrag() {
     const rectInitSize = SHAPE_SIZE.RECT;
-    let isDragging = false, draggedGNode = null;
-    let dragPositionX = 0, dragPositionY = 0;
+    let dragPositionX = 0, dragPositionY = 0, draggedGNode = null;
     const dragingShape = document.getElementById('shape--draging');
     const sideNode = getEleByClass('side');
     const canDragAreaNode = document.getElementById('graph');
@@ -219,7 +254,8 @@
     
 
     const draging = function(e) {
-      if (!isDragging) return;
+      e.stopPropagation();
+      if (!shapeStatus.isDraggingFromSide) return;
       const style = dragingShape.style;
       const posX = e.clientX;
       const posY = e.clientY;
@@ -230,8 +266,10 @@
       style.top = `${posY - rectInitSize.height / 2}px`;
       style.left = `${posX - rectInitSize.width / 2}px`;
     }
-    const dragEnd = function() {
-      isDragging = false;
+    const dragEnd = function(e) {
+      e.stopPropagation();
+      if (!shapeStatus.isDraggingFromSide) return;
+      console.log('sideDrapToCanvas dragEnd');
       dragingShape.style.cssText='display:none;top:0;left:0;';
       if (dragPositionX >= viewLeft) {
         let posX = canvasLeft + 100, posY = canvasTop + 100;
@@ -259,12 +297,14 @@
       }
       canDragAreaNode.removeEventListener('mousemove', draging);
       canDragAreaNode.removeEventListener('mouseup', dragEnd);
+      shapeStatus.isDraggingFromSide = false;
     }
 
     sideNode.addEventListener('mousedown', function(e) {
+      e.stopPropagation();
       const gNode = getGNodeOfSVG(e.target);
       if (!gNode) return;
-      isDragging = true;
+      shapeStatus.isDraggingFromSide = true;
       draggedGNode = gNode.cloneNode(true);
       canDragAreaNode.addEventListener('mousemove', draging);
       canDragAreaNode.addEventListener('mouseup', dragEnd);
@@ -272,54 +312,34 @@
     })
   }
 
-  function createLineConnectShape(shapeNode) {
-    if (!shapeNode) return;
-    const imageHalfSize = 2.5;
-    const { x, y, width, height } = getShapePositionAndSize(shapeNode);
-    const points = {
-      'top-left': [x - imageHalfSize, y - imageHalfSize],
-      'top-mid': [x + (width / 2) - imageHalfSize, y - imageHalfSize],
-      'top-right': [x + width - imageHalfSize, y - imageHalfSize],
-      'mid-left': [x - imageHalfSize, y + height / 2 - imageHalfSize],
-      'mid-right': [x + width - imageHalfSize, y + height / 2 - imageHalfSize],
-      'bottom-left': [x - imageHalfSize, y + height - imageHalfSize],
-      'bottom-mid': [x + width / 2 - imageHalfSize, y + height - imageHalfSize],
-      'bottom-right': [x + width - imageHalfSize, y + height - imageHalfSize]
-    };
-    lineConnectGNode.innerHTML = '';
-    for (let value of Object.values(points)) {
-      const pointGNode = createSVGElement('g');
-      const image = createSVGElement('image');
-      image.href.baseVal = 'data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI1cHgiIGhlaWdodD0iNXB4IiB2ZXJzaW9uPSIxLjEiPjxwYXRoIGQ9Im0gMCAwIEwgNSA1IE0gMCA1IEwgNSAwIiBzdHJva2U9IiMyOWI2ZjIiLz48L3N2Zz4=';
-      image.setAttribute('x', value[0]);
-      image.setAttribute('y', value[1]);
-      image.setAttribute('width', 5);
-      image.setAttribute('height', 5);
-      pointGNode.appendChild(image);
-      lineConnectGNode.appendChild(pointGNode);
-    }
-  }
-
   function dragShapeInCanvas() {
-    let isDragging = false, shapeNode = null;
+    let shapeNode = null;
+    const rectInitSize = SHAPE_SIZE.RECT;
     const draging = function(e) {
-      if (!isDragging) return;
+      e.stopPropagation();
+      if (!shapeStatus.isDraggingInCanvas) return;
       const posX = e.clientX;
       const posY = e.clientY;
-      shapeNode.setAttribute('x', posX - canvasLeft);
-      shapeNode.setAttribute('y', posY - canvasTop);
+      shapeNode.setAttribute('x', posX - canvasLeft - rectInitSize.width / 2);
+      shapeNode.setAttribute('y', posY - canvasTop - rectInitSize.height / 2);
     };
     const dragEnd = function(e) {
-      isDragging = false;
+      e.stopPropagation();
+      if (!shapeStatus.isDraggingInCanvas) return;
+      console.log('dragInCanvas dragend');
       canvasNode.removeEventListener('mousemove', draging);
       canvasNode.removeEventListener('mouseup', dragEnd);
+      shapeStatus.isDraggingInCanvas = false;
     };
 
     shapeGNode.addEventListener('mousedown', function(e) {
+      e.stopPropagation();
       const target = e.target;
       if (!isSVGElement(target)) return;
-      isDragging = true;
+      shapeStatus.isDraggingInCanvas = true;
       shapeNode = target;
+      lineConnectGNode.innerHTML = '';
+      shadowShapeGNode.innerHTML = '';
       canvasNode.addEventListener('mousemove', draging);
       canvasNode.addEventListener('mouseup', dragEnd);
     });
@@ -327,6 +347,9 @@
 
   function registerShapeEvents() {
 
+    handleSideIconGrag();
+
+    // 在画布内拖动图形，在松开鼠标时会触发图形click事件，会创建shadow shape
     dragShapeInCanvas();
 
     document.addEventListener('keydown', function(e) {
@@ -335,16 +358,20 @@
         shapeGNode.removeChild(selectedShape);
         selectedShape = null;
         shadowShapeGNode.innerHTML = '';
+        shapeStatus.isSelected = false;
       }
     });
 
     // 处理选择shape后取消
     canvasNode.addEventListener('click', function(e) {
+      console.log(shapeStatus);
       const target = e.target;
       const tagName = target.tagName;
       if (!isSVGElement(target) || tagName === 'svg') {
+        console.log('canvasNode click');
         selectedShape = null;
         shadowShapeGNode.innerHTML = '';
+        shapeStatus.isSelected = false;
       }
     });
 
@@ -352,6 +379,7 @@
     shapeGNode.addEventListener('click', function(e) {
       const target = e.target;
       if (!isSVGElement(target)) return;
+      console.log('shapeGNode click');
       selectedShape = target.parentNode;
       recreateShadowShape(target);
     });
@@ -359,26 +387,30 @@
     // 鼠标移到图形上事件
     shapeGNode.addEventListener('mouseover', function(e) {
       e.stopPropagation();
+      if (shapeStatus.isSelected) return;
       const target = e.target;
       if (selectedShape === target) return;
       const tagName = target.tagName;
       if (tagName === 'g') return;
+      console.log('shapeGNode mouseover');
       createLineConnectShape(target);
     });
 
     shapeGNode.addEventListener('mouseout', function(e) {
+      if (shapeStatus.isSelected) return;
       const target = e.target;
       const tagName = target.tagName;
       if (tagName === 'g') return;
+      console.log('shapeGNode mouseout');
       lineConnectGNode.innerHTML = '';
     });
+
   }
 
 
 
   dragReszieBar();
   handleGraphClick();
-  handleGraphGrag();
   registerShapeEvents();
 
 })(window);
