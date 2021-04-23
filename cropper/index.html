@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片裁剪</title>
+  <link rel="stylesheet" href="./cropper.css">
+  <style>
+    #button {
+      margin: 10px;
+    }
+    #preview {
+      padding-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="image-container">
+    <img id="image"
+      src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2Fb581bee1d7dc13a08b8507a6a94af8ad849ab4f8.png&refer=http%3A%2F%2Fi0.hdslb.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1621508140&t=16435ed7b2dff7b69646e852a1887d20"
+      crossOrigin="anonymous"
+    >
+  </div>
+  <div class="container">
+    <button id="button">裁剪图片</button>
+    <div id="preview"></div>
+  </div>
+
+  <script src="./cropper.js"></script>
+  <script>
+     const crop = new Cropper(document.getElementById('image'));
+     const previewNode = document.getElementById('preview');
+     document.getElementById('button').addEventListener('click', function() {
+       const canvas = crop.getCropCanvas();
+       const image = new Image();
+       image.src = canvas.toDataURL();
+       image.onload = function(e) {
+         const ratio = 0.3;
+         const { width, height } = e.target;
+         image.style.cssText = `width:${width * ratio}px;height:${height * ratio}px;`;
+       }
+       previewNode.innerHTML = '';
+       previewNode.appendChild(image);
+     })
+  </script>
+</body>
+
+</html>
