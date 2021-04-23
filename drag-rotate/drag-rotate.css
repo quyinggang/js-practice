@@ -1,0 +1,9 @@
+#rotate-element {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 200px;
+  height: 100px;
+  margin-left: -100px;
+  border: 1px solid #ddd;
+}
