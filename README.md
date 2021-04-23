@@ -116,3 +116,7 @@ JavaScript实践案例
 [视觉差效果文章](https://blog.csdn.net/s1879046/article/details/81366042)    
 ![视觉差效果浅析](./images/parallax.gif)   
 
+#### 图片裁剪
+裁剪框大小更改逻辑和输出裁剪图片   
+![视觉差效果浅析](./images/parallax.gif)   
+
