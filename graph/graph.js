@@ -8,7 +8,7 @@
  * - 支持简易连线逻辑
  * note: 图形旋转后改变大小、位置逻辑相对复杂，其背后涉及到较为复杂的数学计算，待研究补充
  */
-(function(root) {
+ (function(root) {
 
   let uid = 0;
   const dragFlag = {
@@ -86,6 +86,21 @@
     uid += 1;
     return uid;
   };
+  // 自定义事件
+  const dispatchEvent = function(element, type, data) {
+    let event;
+    if (isFunction(Event) && isFunction(CustomEvent)) {
+      event = new CustomEvent(type, {
+        detail: data,
+        bubbles: true,
+        cancelable: true
+      });
+    } else {
+      event = document.createEvent('CustomEvent');
+      event.initCustomEvent(type, true, true, data);
+    }
+    return element.dispatchEvent(event);
+  };
 
   const hiddenDom = function(node) {
     if (!node) return;
@@ -102,7 +117,7 @@
   const createSVGElement = function(tag) {
     if (!tag) return;
     return document.createElementNS("http://www.w3.org/2000/svg", tag);
-  }
+  };
 
   const isSVGElement = function(node) {
     return node instanceof SVGElement;
@@ -355,7 +370,7 @@
           posX = initShapeSize.width
         }
         isDragEvent = false;
-        graphInstance.createShape(svgTagName, {
+        graphInstance.createRectShape(svgTagName, {
           x: posX,
           y: posY,
           width: initShapeSize.width,
@@ -367,263 +382,154 @@
 
   const bindEventsOfContent = function() {
     const graphInstance = this;
-    const { shapeContainerGNode, canvasNode } = graphInstance;
-
+    const { canvasNode } = graphInstance;
+    let mouseoverShape = null;
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       return false;
     });
 
-    // 快捷键删除图形支持
-    document.addEventListener('keydown', function(e) {
-      if (dragFlag.isEditing) return;
-      if (e.keyCode === 8 && graphInstance.selectedShape) {
-        graphInstance.destorySelectedShape();
-      }
-    });
-
     // 处理选择shape后取消
     canvasNode.addEventListener('click', function(e) {
       e.stopPropagation();
-      graphInstance.destoryEditTextarea();
-      if (dragFlag.isRotateDrag) {
-        dragFlag.isRotateDrag = false;
-        return;
-      }
-      console.log('canvas click')
+      graphInstance.destoryEditText();
       const target = e.target;
       const tagName = target.tagName;
       if (!isSVGElement(target) || tagName === 'svg') {
-        graphInstance.clearSelectedShape();
+        graphInstance.destoryResizeBox();
       }
-    });
-
-    // 选择画布中某一个图形
-    shapeContainerGNode.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (dragFlag.isDragInCanvas) {
-        dragFlag.isDragInCanvas = false;
-        return;
-      }
-      const target = e.target;
-      if (!isSVGElement(target)) return;
-      const gNode = target.parentNode;
-      const id = parseInt(gNode.getAttribute('id'), 10);
-      if (!isNumber(id)) return;
-      const selectedShape = graphInstance.selectedShape;
-      if (dragFlag.isEditing && selectedShape && selectedShape.id === id) {
-        return;
-      }
-      console.log('shape click')
-      graphInstance.setSelectedShape(id);
-    });
-
-    // 支持双击输入信息
-    shapeContainerGNode.addEventListener('dblclick', function(e) {
-      dragFlag.isEditing = true;
-      const target = e.target;
-      if (!isSVGElement(target)) return;
-      const gNode = target.parentNode;
-      const id = parseInt(gNode.getAttribute('id'), 10);
-      if (!isNumber(id)) return;
-      // 已存在文本信息需要隐藏其svg text标签内容显示
-      const selectedShape = graphInstance.selectedShape;
-      if (selectedShape && selectedShape.isExistTextContent()) {
-        selectedShape.textBox.hiddenText();
-      }
-      graphInstance.createEditTextarea();
     });
 
     // 鼠标移到图形上事件
     canvasNode.addEventListener('mousemove', function(e) {
       e.preventDefault();
-      const { selectedShape, connectContainerGNode } = graphInstance;
+      if (graphInstance.resizeBox) {
+        mouseoverShape = null;
+        return;
+      };
+      if (graphInstance.connectBox && mouseoverShape) {
+        const { pageX, pageY } = e;
+        const { top, left } = graphInstance.canvasData;
+        const { x, y, width, height } = mouseoverShape;
+        // 扩展mouse离开图形范围边界
+        const range = [ x - 10, x + width + 10, y - 10, y + height + 10];
+        const offsetX = pageX - left, offsetY = pageY - top;
+        const isOutsideX = offsetX < range[0] || offsetX > range[1];
+        const isOutsideY = offsetY < range[2] || offsetY > range[3];
+        if (isOutsideX || isOutsideY) {
+          graphInstance.destoryConnectBox();
+          mouseoverShape = null;
+        }
+      }
       const target = e.target;
-      if (selectedShape || !isSVGElement(target)) return;
+      if (!isSVGElement(target)) return;
       const gNode = target.parentNode;
       const id = parseInt(gNode.getAttribute('id'), 10);
-      if (isNumber(id)) return;
-      // mouseHoverShapeId = id;
-      // const shape = graphInstance.getShapeFromShapeMap(id);
-      // const connectBox = shape.connectBox;
-      // graphInstance.destoryConnectContainerContent();
-      // connectContainerGNode.appendChild(connectBox.gNode);
+      if (!isNumber(id)) return;
+      graphInstance.destoryConnectBox();
+      mouseoverShape = graphInstance.getShapeFromShapeMap(id);
+      const { x, y, width, height } = mouseoverShape;
+      graphInstance.createConnectBox(x, y, width, height);
     });
-
-    // shapeContainerGNode.addEventListener('mouseleave', function(e) {
-    //   e.stopPropagation();
-    //   const { selectedShape } = graphInstance;
-    //   if (selectedShape) return;
-    //   const target = e.target;
-    //   if (!isSVGElement(target)) return;
-    //   mouseHoverShapeId = null;
-    //   graphInstance.destoryConnectContainerContent();
-    // });
   };
 
-  // 处理图形在画布内拖动
   const bindEventsOfShape = function() {
     const graphInstance = this;
-    const { shapeContainerGNode, canvasData } = graphInstance;
-    let isDragging = false, startX = null, startY = null, shapeId = null;
-    registerDrag(
-      shapeContainerGNode,
-      function onDragStart(e) {
-        if (dragFlag.isEditing) return;
-        const target = e.target;
-        if (!isSVGElement(target)) return;
-        const gNode = target.parentNode;
-        shapeId = parseInt(gNode.getAttribute('id'), 10);
-        if (!isNumber(shapeId)) return;
-        graphInstance.setSelectedShape(shapeId);
-        graphInstance.hiddenResizePoints();
-        isDragging = true;
-        startX = e.pageX;
-        startY = e.pageY;
-        graphInstance.destoryEditTextarea();
-      },
-      function onDraging(e) {
-        if (!isDragging) return;
-        dragFlag.isDragInCanvas = true;
+    const { shapeContainerGNode, resizeContainerGNode } = graphInstance;
+    // shape选择后创建resize box
+    document.addEventListener('createResizeBox', function(event) {
+      const { shapeInstance } = event.detail;
+      graphInstance.destoryConnectBox();
+      graphInstance.createResizeBox(shapeInstance);
+    });
+
+    // shape双击后创建输入框
+    document.addEventListener('createEditText', function(event) {
+      const { x, y, width, height, initTextContent } = event.detail;
+      const { canvasData: { top, left }, sideNode } = graphInstance;
+      const sideWidth = sideNode.offsetWidth;
+      const pos = [left - sideWidth + x - 2, y + top + height / 2 - 10];
+      graphInstance.createEditText(
+        pos[0], pos[1], width - 16, Math.round(height / 3),
+        initTextContent
+      );
+    });
+
+    // 删除指定shape
+    document.addEventListener('destoryShape', function(event) {
+      const { id, shapeNode, textNode } = event.detail;
+      graphInstance.destoryResizeBox();
+      shapeContainerGNode.removeChild(shapeNode);
+      textNode && shapeContainerGNode.removeChild(textNode);
+      graphInstance.shapeMap.delete(id);
+    });
+
+    // 插入或删除textbox node
+    document.addEventListener('insertOrRemoveTextNode', function(event) {
+      const { type, node } = event.detail;
+      if (type === 0) {
+        node && shapeContainerGNode.appendChild(node);
+      } else if (type === 1) {
+        node && shapeContainerGNode.removeChild(node);
+      }
+    });
+
+    // shape拖拽
+    document.addEventListener('dragShape', function(event) {
+      let { startX, startY, shapeInstance } = event.detail;
+      const canvasData = graphInstance.canvasData;
+      graphInstance.destoryConnectBox();
+      graphInstance.hiddenResizePoints();
+      graphInstance.destoryEditText();
+      const onDraging = function(e) {
+        if (shapeInstance.getShapeStatus('edit')) return;
+        shapeInstance.activeShapeStatus('drag');
         const { pageX, pageY } = e;
         // 简单处理顶部边界
         const isRender = pageX >= canvasData.left && pageY >= canvasData.top;
         if (!isRender) return;
         const xRatio = pageX - startX;
         const yRatio = pageY - startY;
-        const { x, y } = graphInstance.selectedShape;
+        const { x, y } = shapeInstance;
         const current = [x + xRatio, y + yRatio];
         const newX = current[0] <= 0 ? 0 : current[0];
         const newY = current[1] <= 0 ? 0 : current[1];
-        graphInstance.resizeShape(newX, newY);
+        shapeInstance.updatePositionAndSize(newX, newY);
         graphInstance.resizeResizeBox(newX, newY);
         startX = pageX;
         startY = pageY;
-      },
-      function onDragEnd() {
-        if (!isDragging || !dragFlag.isDragInCanvas) return;
-        console.log('shape in canvas:' + isDragging)
-        isDragging = false;
-        graphInstance.createResizeBox();
-      }
-    );
-  };
+      };
+      const onDragEnd = function(e) {
+        document.removeEventListener('mousemove', onDraging);
+        document.removeEventListener('mouseup', onDragEnd);
+        if (!shapeInstance.getShapeStatus('drag')) return;
+        graphInstance.createResizeBox(shapeInstance);
+      };
+      document.addEventListener('mousemove', onDraging);
+      document.addEventListener('mouseup', onDragEnd);
+    });
 
-  // const handleShapeRotate = function() {
-  //   const graphInstance = this;
-  //   const { resizeContainerGNode, canvasData } = graphInstance;
-  //   const { top, left } = canvasData;
-  //   let isDragging = false, originX = null, originY = null,
-  //     rotateAngle = null, startAngle = null, startDist = null;
-  //   registerDrag(
-  //     resizeContainerGNode,
-  //     function onDragStart(e) {
-  //       const target = e.target;
-  //       if (!isSVGElement(target) || target.tagName !== 'image') {
-  //         return;
-  //       }
-  //       const gNode = target.parentNode;
-  //       const id = gNode.getAttribute('id');
-  //       if (id.indexOf('rotate-image') < 0) return;
-  //       isDragging = true;
-  //       graphInstance.hiddenResizePoints();
-  //       [originX, originY] = graphInstance.selectedShape.center;
-  //       originX += left;
-  //       originY += top;
-  //       const dx = e.pageX - originX;
-  //       const dy = e.pageY - originY;
-  //       startAngle = (dx !== 0) ? Math.atan(dy / dx) * 180 / Math.PI + 90 : 0;
-  //       startDist = Math.sqrt(dx * dx + dy * dy);
-  //     },
-  //     function onDraging(e) {
-  //       if (!isDragging) return;
-  //       dragFlag.isRotateDrag = true;
-  //       const { pageX, pageY } = e;
-  //       var dx = originX - pageX;
-  //       var dy = originY - pageY;
-  //       let currentAlpha = (dx != 0) ? Math.atan(dy / dx) * 180 / Math.PI + 90 : ((dy < 0) ? 180 : 0);
-  //       console.log(currentAlpha + ': ---- 1')
-  //       if (dx > 0)
-  //       {
-  //         currentAlpha -= 180;
-  //       }
-  //       console.log(currentAlpha + ': ---- 2')
-  //       currentAlpha -= startAngle;
-  //       console.log(currentAlpha + ': ---- 3' + '---:' + startAngle)
+    // resize shape
+    document.addEventListener('resizeShape', function(event) {
+      const detail = event.detail;
+      const { imageNode, targetShape } = detail;
+      const { width: canvasWidth, height: canvasHeight } = graphInstance.canvasData;
+      const minLeft = 0, minTop = 0, rightLimit = minLeft + canvasWidth,
+            bottomLimit = minTop + canvasHeight;
+      let { startX, startY, action } = detail;
+      let isResizeDrag = false;
 
-  //         var dx = pageX - originX;
-  //         var dy = pageY - originY;
-  //         var dist = Math.sqrt(dx * dx + dy * dy);
-  //         if (dist - startDist < 2)
-  //         {
-  //           raster = 15;
-  //         }
-  //         else if (dist - this.startDist < 25)
-  //         {
-  //           raster = 5;
-  //         }
-  //         else
-  //         {
-  //           raster = 1;
-  //         }
-          
-  //       currentAlpha = Math.round(currentAlpha / raster) * raster;
-  //       console.log(currentAlpha + ': ---- 4')
-  //       // rotateAngle = Math.atan2(pageY - originY, pageX - originX) / Math.PI * 180;
-  //       graphInstance.setRotateAngle(currentAlpha);
-  //       graphInstance.rotateResizeBox();
-  //     },
-  //     function onDragEnd() {
-  //       if (!dragFlag.isRotateDrag || !isDragging) return;
-  //       isDragging = false;
-  //       graphInstance.createResizeBox();
-  //       graphInstance.rotateResizeBox();
-  //       graphInstance.rotateShape();
-  //     }
-  //   );
-  // };
-
-  const handleShapeResize = function() {
-    const graphInstance = this;
-    const { resizeContainerGNode, canvasData } = graphInstance;
-    let isDragging = false, startX = null, startY = null,
-        action = null, imageNode = null;
-    registerDrag(
-      resizeContainerGNode,
-      function onDragStart(e) {
-        const target = e.target;
-        if (!isSVGElement(target) || target.tagName !== 'image') {
-          return;
-        }
-        const gNode = target.parentNode;
-        const id = gNode.getAttribute('id');
-        if (!id || id.indexOf('resize') < 0) return;
-        isDragging = true;
-        imageNode = gNode.children[0];
-        action = id.trim();
-        startX = e.pageX;
-        startY = e.pageY;
-        pointX = Number(imageNode.getAttribute('x'));
-        pointY = Number(imageNode.getAttribute('y'))
-        graphInstance.hiddenResizeBoxAndSomePoints(gNode);
-      },
-      function onDraging(e) {
-        if (!isDragging) return;
-        const { width: canvasWidth, height: canvasHeight } = canvasData;
-        const minLeft = 0, minTop = 0;
-        const rightLimit = minLeft + canvasWidth;
-        const bottomLimit = minTop + canvasHeight;
+      const onDraging = function(e) {
         const { pageX, pageY } = e;
-        const { selectedShape } = graphInstance;
-        let { x: left, y: top, width, height } = selectedShape;
+        let { x: left, y: top, width, height } = targetShape;
         let tempAction = action, isRender = true;
-        dragFlag.isResizeDrag = true;
         const right = left + width;
         const bottom = top + height;
         const offset = {
           x: pageX - startX,
           y: pageY - startY
         };
+        isResizeDrag = true;
         switch (tempAction) {
           // 左边
           case RESIZE_DIR.midLeft:
@@ -632,7 +538,7 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.left, offset);
+            graphInstance.checkBound(targetShape, SIDE.left, offset);
             width -= offset.x;
             left += offset.x;
             if (width < 0) {
@@ -647,7 +553,7 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.right, offset);
+            graphInstance.checkBound(targetShape, SIDE.right, offset);
             width += offset.x;
             if (width < 0) {
               tempAction = RESIZE_DIR.midLeft;
@@ -661,7 +567,7 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.top, offset);
+            graphInstance.checkBound(targetShape, SIDE.top, offset);
             height -= offset.y;
             top += offset.y;
             if (height < 0) {
@@ -676,7 +582,7 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.bottom, offset);
+            graphInstance.checkBound(targetShape, SIDE.bottom, offset);
             height += offset.y;
             if (height < 0) {
               tempAction = RESIZE_DIR.topMid;
@@ -690,8 +596,8 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.top, offset);
-            graphInstance.checkBound(SIDE.left, offset);
+            graphInstance.checkBound(targetShape, SIDE.top, offset);
+            graphInstance.checkBound(targetShape, SIDE.left, offset);
             width -= offset.x;
             height -= offset.y;
             top += offset.y;
@@ -718,8 +624,8 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.top, offset);
-            graphInstance.checkBound(SIDE.right, offset);
+            graphInstance.checkBound(targetShape, SIDE.top, offset);
+            graphInstance.checkBound(targetShape, SIDE.right, offset);
             width += offset.x;
             height -= offset.y;
             top += offset.y;
@@ -745,8 +651,8 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.bottom, offset);
-            graphInstance.checkBound(SIDE.left, offset);
+            graphInstance.checkBound(targetShape, SIDE.bottom, offset);
+            graphInstance.checkBound(targetShape, SIDE.left, offset);
             width -= offset.x;
             height += offset.y;
             left += offset.x;
@@ -772,8 +678,8 @@
               isRender = false;
               break;
             }
-            graphInstance.checkBound(SIDE.bottom, offset);
-            graphInstance.checkBound(SIDE.right, offset);
+            graphInstance.checkBound(targetShape, SIDE.bottom, offset);
+            graphInstance.checkBound(targetShape, SIDE.right, offset);
             width += offset.x;
             height += offset.y;
             if (width < 0 && height < 0) {
@@ -794,28 +700,53 @@
             break;
         }
         if (isRender) {
-          graphInstance.resizeShape(left, top, width, height);
+          targetShape.updatePositionAndSize(left, top, width, height);
           const pointMap = computeResizeImagePosition(left, top, width, height);
           const point = pointMap[action];
           setAttributes(imageNode, { x: point.x, y: point.y });
-          graphInstance.updateEditTextareaPositionAndSize();
+          graphInstance.updateEditTextPositionAndSize(targetShape);
           action = tempAction;
         }
         startX = pageX;
         startY = pageY;
-      },
-      function onDragEnd() {
-        if (!isDragging || !dragFlag.isResizeDrag) return;
-        isDragging = false;
-        graphInstance.createResizeBox();
-      }
-    );
+      };
+      const onDragEnd = function() {
+        document.removeEventListener('mousemove', onDraging);
+        document.removeEventListener('mouseup', onDragEnd);
+        if (!isResizeDrag) return;
+        graphInstance.createResizeBox(targetShape);
+      };
+      document.addEventListener('mousemove', onDraging);
+      document.addEventListener('mouseup', onDragEnd);
+    });
+
+    // connect shape
+    document.addEventListener('connectLine', function(event) {
+      const {
+        startPoint, startX, startY, direction,
+        limit: { xLimit, yLimit }
+      } = event.detail;
+      const { top, left } = graphInstance.canvasData;
+      const onDraging = function(e) {
+        const { pageX, pageY } = e;
+        const svgPointX = pageX - left;
+        const svgPointY = pageY - top;
+        if (svgPointX >= xLimit[0] && svgPointX <= xLimit[1]) {
+          return;
+        }
+      };
+      const onDragEnd = function(e) {
+        document.removeEventListener('mousemove', onDraging);
+        document.removeEventListener('mouseup', onDragEnd);
+      };
+      document.addEventListener('mousemove', onDraging);
+      document.addEventListener('mouseup', onDragEnd);
+    });
   };
 
   function Graph(element) {
     if (!isElement(element)) return;
     this.element = element;
-    this.selectedShape = null;
     this.resizeBox = null;
     this.connectBox = null;
     this.rotateAngle = null;
@@ -824,8 +755,8 @@
     this.contentNode = null;
     this.shapeContainerGNode = null;
     this.resizeContainerGNode = null;
-    this.ConnectContainerGNode = null;
-    this.editTextarea = null;
+    this.connectContainerGNode = null;
+    this.editText = null;
     this.shapeMap = new Map();
     this.canvasData = { top: 0, left: 0, width: 0, height: 0 };
     this.init();
@@ -858,46 +789,36 @@
       bindEventsOfAside.call(this);
       bindEventsOfContent.call(this);
       bindEventsOfShape.call(this);
-      // handleShapeRotate.call(this);
-      handleShapeResize.call(this);
     },
-    createEditTextarea: function() {
-      const {
-        canvasData: { top, left },
-        sideNode,
-        selectedShape: { x, y, width, height }
-      } = this;
-      const contentEditTextarea = document.createElement('div');
-      setAttributes(contentEditTextarea, {
+    createEditText: function(x, y, width, height, initTextContent) {
+      const editTextNode = document.createElement('div');
+      setAttributes(editTextNode, {
         id: 'edit-container',
         contenteditable: true
       });
-      const sideWidth = sideNode.offsetWidth;
-      const pos = [left - sideWidth + x - 2, y + top];
-      setStyles(contentEditTextarea, {
-        top: `${pos[1] + height / 2 - 10}px`,
-        left: `${pos[0]}px`,
-        width: `${width - 16}px`,
-        height: `${Math.round(height / 3)}px`
+      setStyles(editTextNode, {
+        top: `${y}px`,
+        left: `${x}px`,
+        width: `${width}px`,
+        height: `${height}px`
       });
-      const { textBox } = this.selectedShape;
-      if (textBox && !!textBox.text) {
-        contentEditTextarea.innerText = textBox.text;
+      if (!!initTextContent) {
+        editTextNode.innerText = initTextContent;
       }
-      this.canvasNode.parentNode.appendChild(contentEditTextarea);
-      contentEditTextarea.focus();
-      this.editTextarea = contentEditTextarea;
+      this.canvasNode.parentNode.appendChild(editTextNode);
+      editTextNode.focus();
+      this.editText = editTextNode;
       this.bindEditEndEvent();
     },
-    destoryEditTextarea() {
-      const editTextarea = this.editTextarea;
-      if (!editTextarea) return;
-      this.editTextarea = null;
-      this.canvasNode.parentNode.removeChild(editTextarea);
+    destoryEditText() {
+      const editText = this.editText;
+      if (!editText) return;
+      this.editText = null;
+      this.canvasNode.parentNode.removeChild(editText);
     },
-    updateEditTextareaPositionAndSize: function() {
-      const editTextarea = this.editTextarea;
-      if (!editTextarea) return;
+    updateEditTextPositionAndSize: function(shape) {
+      const editText = this.editText;
+      if (!editText) return;
       const {
         canvasData: { top, left },
         sideNode,
@@ -905,7 +826,7 @@
       } = this;
       const sideWidth = sideNode.offsetWidth;
       const pos = [left - sideWidth + x - 2, y + top];
-      setStyles(editTextarea, {
+      setStyles(editText, {
         top: `${pos[1]}px`,
         left: `${pos[0]}px`,
         width: `${width - 16}px`,
@@ -913,25 +834,21 @@
       });
     },
     bindEditEndEvent: function() {
-      const editTextarea = this.editTextarea;
-      if (!editTextarea) return;
-      editTextarea.addEventListener('blur', e => {
-        dragFlag.isEditing = false;
-        const text = e.target.innerText.trim();
-        if (!!text) {
-          this.insertTextContent(text);
-        } else {
-          this.destoryTextBox();
-        }
-        this.destoryEditTextarea();
+      const editText = this.editText;
+      if (!editText) return;
+      editText.addEventListener('blur', e => {
+        dispatchEvent(document, 'createOrDestoryTextBox', {
+          textContent: e.target.innerText.trim()
+        });
+        this.destoryEditText();
       });
     },
-    checkBound: function(side, offset) {
+    checkBound: function(shape, side, offset) {
       const { width: canvasWidth, height: canvasHeight } = this.canvasData;
       const minLeft = 0, minTop = 0;
       const rightLimit = minLeft + canvasWidth;
       const bottomLimit = minTop + canvasHeight;
-      const { x: left, y: top, width, height } = this.selectedShape;
+      const { x: left, y: top, width, height } = shape;
       const { x: offsetX, y: offsetY } = offset;
       const startRight = left + width;
       const endRight = startRight + offsetX;
@@ -972,95 +889,43 @@
       canvasData.width = width;
       canvasData.height = height;
     },
-    setRotateAngle: function(angle) {
-      if (!isNumber(angle)) return;
-      this.rotateAngle = angle;
-    },
     getShapeFromShapeMap: function(id) {
       return this.shapeMap.get(id);
     },
-    createShape: function(tag, tagAttrs) {
+    createRectShape: function(tag, tagAttrs) {
       const id = getUId();
-      const shape = new Shape(id, tag, tagAttrs);
+      const shape = new RectShape(id, tag, tagAttrs);
       this.shapeMap.set(id, shape);
-      this.selectedShape = shape;
-      this.createResizeBox();
+      this.createResizeBox(shape);
       this.shapeContainerGNode.appendChild(shape.gNode);
     },
-    insertTextContent: function(text) {
-      if (!text || !String(text).trim()) return;
-      const selectedShape = this.selectedShape;
-      if (!selectedShape) return;
-      const textBox = selectedShape.textBox;
-      if (!textBox) {
-        selectedShape.createTextBox(text);
-        const { gNode } = selectedShape.textBox;
-        this.shapeContainerGNode.appendChild(gNode);
-      } else {
-        textBox.displayText();
-      }
+    createConnectBox: function(x, y, width, height) {
+      const connectBox = new ConnectBox(x, y, width, height);
+      this.connectBox = connectBox;
+      this.connectContainerGNode.appendChild(connectBox.gNode);
     },
-    destoryTextBox: function() {
-      const selectedShape = this.selectedShape;
-      if (!selectedShape || !selectedShape.textBox) return;
-      const { gNode } = selectedShape.textBox;
-      this.shapeContainerGNode.removeChild(gNode);
-      selectedShape.destoryTextBox();
+    destoryConnectBox: function() {
+      const connectBox = this.connectBox;
+      if (!connectBox) return;
+      this.destoryConnectContainerContent();
+      this.connectBox = null;
     },
-    rotateShape: function() {
-      const { rotateAngle, selectedShape } = this;
-      if (!selectedShape || !isNumber(rotateAngle)) return;
-      const center = selectedShape.center;
-      setAttributes(selectedShape.shapeNode, {
-        transform: `rotate(${rotateAngle},${center[0]},${center[1]})`
-      });
-      if (rotateAngle === 0) {
-        removeAttributes(selectedShape.shapeNode, ['transform']);
-      }
+    createLineShape: function() {
+      const id = getUId();
+      const shape = new LineShape(id, tag);
+      this.shapeMap.set(id, shape);
+      this.shapeContainerGNode.appendChild(shape.gNode);
     },
-    resizeShape: function(x, y, width, height) {
-      const { selectedShape } = this;
-      if (!selectedShape) return;
-      selectedShape.updatePositionAndSize(x, y, width, height);
-    },
-    setSelectedShape: function(id) {
-      const shape = this.getShapeFromShapeMap(id);
-      if (shape) {
-        this.selectedShape = shape;
-        this.createResizeBox();
-        this.rotateShape();
-      }
-    },
-    clearSelectedShape: function() {
-      const selectedShape = this.selectedShape;
-      if (!selectedShape) return;
-      this.selectedShape = null;
-      this.destoryResizeBox();
+    createResizeBox: function(shape) {
+      if (!shape) return;
+      resizeBox = new ResizeBox(shape.x, shape.y, shape.width, shape.height, shape);
+      this.destoryResizeContainerContent();
+      this.resizeContainerGNode.appendChild(resizeBox.gNode);
+      this.resizeBox = resizeBox;
     },
     destoryResizeBox: function() {
       this.resizeBox = null;
       this.destoryResizeContainerContent();
-    },
-    destorySelectedShape: function() {
-      const { selectedShape, shapeContainerGNode } = this;
-      if (!selectedShape) return;
-      shapeContainerGNode.removeChild(selectedShape.gNode);
-      this.shapeMap.delete(selectedShape.id);
-      this.clearSelectedShape();
-    },
-    createResizeBox: function() {
-      const { selectedShape, rotateAngle } = this;
-      if (!selectedShape) return;
-      let resizeBox = null;
-      const tag = selectedShape.tag;
-      if (tag === 'rect') {
-        const { x, y, width, height } = selectedShape;
-        resizeBox = new ResizeBox(x, y, width, height, rotateAngle);
-      }
-      if (!resizeBox) return;
-      this.destoryResizeContainerContent();
-      this.resizeContainerGNode.appendChild(resizeBox.gNode);
-      this.resizeBox = resizeBox;
     },
     resizeResizeBox: function(x, y, width, height) {
       const resizeBox = this.resizeBox;
@@ -1072,21 +937,6 @@
       if (!resizeBox) return;
       resizeBox.hiddenResizePoints();
     },
-    displayResizePoints: function() {
-      const resizeBox = this.resizeBox;
-      if (!resizeBox) return;
-      resizeBox.displayResizePoints();
-    },
-    hiddenResizeBoxAndSomePoints: function(visibleDom) {
-      const resizeBox = this.resizeBox;
-      if (!resizeBox) return;
-      resizeBox.hiddenResizeBoxAndSomePoints(visibleDom);
-    },
-    displayResizeBoxAndAllPoints: function() {
-      const resizeBox = this.resizeBox;
-      if (!resizeBox) return;
-      resizeBox.displayResizeBoxAndAllPoints();
-    },
     destoryResizeContainerContent: function() {
       this.resizeContainerGNode.innerHTML = '';
     },
@@ -1095,47 +945,176 @@
     },
   }
 
-  function Shape(uid, tag, tagAttrs) {
-    this.tag = tag;
+  const rectShapeHandler = {
+    onDelete: function(event) {
+      if (event.keyCode !== 8) return;
+      const shapeInstance = this;
+      if (shapeInstance.getShapeStatus('edit')) return;
+      const { id, gNode, textBox } = shapeInstance;
+      shapeInstance.unbindEvents();
+      dispatchEvent(document, 'destoryShape', {
+        id,
+        shapeNode: gNode,
+        textNode: textBox ? textBox.gNode : null
+      });
+    },
+    onCreateOrDestoryTextBox: function(event) {
+      const { textContent } = event.detail;
+      const shapeInstance = this;
+      shapeInstance.effectShapeStatus('edit');
+      if (textContent) {
+        const textBox = shapeInstance.textBox;
+        if (!textBox) {
+          shapeInstance.createTextBox(textContent);
+          dispatchEvent(document, 'insertOrRemoveTextNode', {
+            type: 0,
+            node: shapeInstance.textBox.gNode
+          });
+        } else {
+          textBox.updateTextContent(textContent);
+          textBox.displayText();
+        }
+      } else {
+        const textBox = shapeInstance.textBox;
+        textBox && dispatchEvent(document, 'insertOrRemoveTextNode',{
+          type: 1,
+          node: textBox.node
+        });
+        shapeInstance.destoryTextBox();
+      }
+    },
+    onClick: function(event) {
+      event.stopPropagation();
+      const shapeInstance = this;
+      if (shapeInstance.getShapeStatus('drag')) {
+        return shapeInstance.effectShapeStatus('drag');
+      }
+      if (shapeInstance.getShapeStatus('edit')) {
+        return;
+      }
+      dispatchEvent(document, 'createResizeBox', { shapeInstance });
+    },
+    onDbClick: function(event) {
+      event.stopPropagation();
+      const shapeInstance = this;
+      const { x, y, width, height } = shapeInstance;
+      let initTextContent = null;
+      shapeInstance.activeShapeStatus('edit');
+      // 已存在文本信息需要隐藏其svg text标签内容显示
+      if (shapeInstance.isExistTextContent()) {
+        const textBox = shapeInstance.textBox;
+        textBox.hiddenText();
+        initTextContent = textBox.getTextContent();
+      }
+      dispatchEvent(document, 'createEditText', {
+        x, y, width, height, initTextContent
+      });
+    },
+    onMouseDown: function(event) {
+      event.stopPropagation();
+      const shapeInstance = this;
+      if (shapeInstance.getShapeStatus('edit')) return;
+      dispatchEvent(document, 'dragShape', {
+        startX: event.pageX,
+        startY: event.pageY,
+        shapeInstance
+      });
+    },
+  };
+
+  function RectShape(uid, tag, tagAttrs) {
     this.id = uid;
+    this.tag = tag;
     setKeys(this, tagAttrs);
     this.center = null;
     this.gNode = null;
     this.shapeNode = null;
     this.textBox = null;
+    this.isDragging = false;
+    this.isEditing = false;
     this.init();
   }
 
-  Shape.prototype = {
+  RectShape.prototype = {
     init: function() {
-      const tag = this.tag;
+      const gNode = this.createElement();
+      this.updateCenter();
+      this.shapeNode = gNode.children[0];
+      this.gNode = gNode;
+      this.bindEvents();
+    },
+    createElement: function() {
       const gNode = createSVGElement('g');
       setStyles(gNode, {
         visibility: 'visible',
         cursor: 'move'
       });
-      const shapeNode = createSVGElement(tag);
-      if (tag === 'rect') {
-        const { x, y, width, height } = this;
-        setAttributes(shapeNode, { x, y, width, height });
-      }
+      const shapeNode = createSVGElement('rect');
+      const { x, y, width, height } = this;
       setAttributes(shapeNode, {
+        x, y, width, height,
         fill: '#fff',
         stroke: '#000',
         'stroke-width': '1.3',
         'pointer-events': 'all'
       });
-      gNode.setAttribute('id', this.id);
+      setAttributes(gNode, { id: this.id });
       gNode.appendChild(shapeNode);
-      this.updateCenter();
-      this.shapeNode = shapeNode;
-      this.gNode = gNode;
+      return gNode;
+    },
+    bindEvents: function() {
+      const { gNode } = this;
+      const prototype = RectShape.prototype;
+      prototype.onClick = rectShapeHandler.onClick.bind(this);
+      prototype.onDbClick = rectShapeHandler.onDbClick.bind(this);
+      prototype.onMouseDown = rectShapeHandler.onMouseDown.bind(this);
+      prototype.onDelete = rectShapeHandler.onDelete.bind(this);
+      prototype.onCreateOrDestoryTextBox = rectShapeHandler.onCreateOrDestoryTextBox.bind(this);
+      document.addEventListener('keydown', this.onDelete);
+      document.addEventListener('createOrDestoryTextBox', this.onCreateOrDestoryTextBox);
+      gNode.addEventListener('click', this.onClick);
+      gNode.addEventListener('dblclick', this.onDbClick);
+      gNode.addEventListener('mousedown', this.onMouseDown);
+    },
+    unbindEvents: function() {
+      const { gNode } = this;
+      document.removeEventListener('keydown', this.onDelete);
+      document.removeEventListener('createOrDestoryTextBox', this.onCreateOrDestoryTextBox);
+      gNode.removeEventListener('click', this.onClick);
+      gNode.removeEventListener('dbclick', this.onDbClick);
+      gNode.removeEventListener('mousedown', this.onMouseDown);
+    },
+    activeShapeStatus: function(key) {
+      let prop = key;
+      switch(key) {
+        case 'edit': prop = 'isEditing';break;
+        case 'drag': prop = 'isDragging';break;
+      }
+      if (this.hasOwnProperty(prop)) {
+        this[prop] = true;
+      }
+    },
+    effectShapeStatus: function(key) {
+      let prop = key;
+      switch(key) {
+        case 'edit': prop = 'isEditing';break;
+        case 'drag': prop = 'isDragging';break;
+      }
+      if (this.hasOwnProperty(prop)) {
+        this[prop] = false;
+      }
+    },
+    getShapeStatus: function(key) {
+      let prop = key;
+      switch(key) {
+        case 'edit': prop = 'isEditing';break;
+        case 'drag': prop = 'isDragging';break;
+      }
+      return !!this[prop];
     },
     updateCenter: function() {
-      if (this.tag === 'rect') {
-        const { x, y, width, height } = this;
-        this.center = [x + width / 2, y + height / 2];
-      }
+      const { x, y, width, height } = this;
+      this.center = [x + width / 2, y + height / 2];
     },
     updatePositionAndSize: function(x, y, width, height) {
       const { x: oldX, y: oldY, width: oldWidth, height: oldHeight } = this;
@@ -1181,6 +1160,32 @@
     }
   };
 
+  function LineShape(uid, tag) {
+    this.uid = uid;
+    this.tag = tag;
+    this.gNode = null;
+    this.lineNode = null;
+    this.init();
+  }
+
+  LineShape.prototype = {
+    init: function() {},
+    createElement: function() {
+      const gNode = createSVGElement('g');
+      const pathNode = createSVGElement('path');
+      setAttributes(pathNode, {
+        fill: 'none',
+        stroke: '#000',
+        'stroke-miterlimit': 10,
+        'pointer-events': 'stroke'
+      });
+      gNode.appendChild(pathNode);
+      this.gNode = gNode;
+    },
+    bindEvents: function() {},
+    updatePosition: function() {},
+  }
+
   function TextBox(x, y, dx, dy, text) {
     this.x = x;
     this.y = y;
@@ -1209,6 +1214,9 @@
       this.gNode = gNode;
       this.textNode = textTag;
     },
+    getTextContent: function() {
+      return this.text;
+    },
     updatePosition: function(x, y, dx, dy) {
       const { x: oldX, y: oldY, dx: oldDx, dy: oldDy } = this;
       if (isNumber(x) && oldX !== x) {
@@ -1225,6 +1233,11 @@
       }
       setAttributes(this.textNode, { x, y, dx, dy });
     },
+    updateTextContent: function(text) {
+      if (!text) return;
+      this.text = text;
+      this.textNode.textContent = text;
+    },
     hiddenText: function() {
       const textNode = this.textNode;
       if (!textNode) return;
@@ -1237,15 +1250,14 @@
     }
   }
 
-  function ResizeBox(x, y, width, height, angle) {
+  function ResizeBox(x, y, width, height, shape) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.angle = angle;
+    this.targetShape = shape;
     this.gNode = null;
     this.shapeNode = null;
-    this.imageNodeList = [];
     this.init();
   }
 
@@ -1261,7 +1273,7 @@
       gNode.appendChild(fragment);
       this.gNode = gNode;
       this.shapeNode = outlineGNode.children[0];
-      this.imageNodeList = [...images];
+      this.bindEvents();
     },
     createOutline: function() {
       const { x, y, width, height } = this;
@@ -1304,6 +1316,23 @@
       }
       return points;
     },
+    bindEvents: function() {
+      const gNode = this.gNode;
+      gNode.addEventListener('mousedown', e => {
+        const target = e.target;
+        const gNode = target.parentNode;
+        const id = gNode.getAttribute('id');
+        if (!id || id.indexOf('resize') < 0) return;
+        this.hiddenResizeBoxAndSomePoints(gNode);
+        dispatchEvent(document, 'resizeShape', {
+          targetShape: this.targetShape,
+          action: id.trim(),
+          startX: e.pageX,
+          startY: e.pageY,
+          imageNode: target
+        });
+      });
+    },
     updatePositionAndSize: function(x, y, width, height) {
       const { x: oldX, y: oldY, width: oldWidth, height: oldHeight } = this;
       if (isNumber(x) && oldX !== x) {
@@ -1335,16 +1364,6 @@
         hiddenDom(item);
       }
     },
-    displayResizePoints: function() {
-      const gNode = this.gNode;
-      if (!gNode) return;
-      const children = gNode.children;
-      if (!children.length) return;
-      const itemList = [...children].slice(1);
-      for (let item of itemList) {
-        displayDom(item);
-      }
-    },
     hiddenResizeBoxAndSomePoints: function(visibleDom) {
       const gNode = this.gNode;
       if (!gNode) return;
@@ -1357,16 +1376,6 @@
         }
       }
     },
-    displayResizeBoxAndAllPoints: function() {
-      const gNode = this.gNode;
-      if (!gNode) return;
-      const children = gNode.children;
-      if (!children.length) return;
-      const itemList = [...children]
-      for (let item of itemList) {
-        displayDom(item);
-      }
-    },
   }
 
   function ConnectBox(x, y, width, height) {
@@ -1375,12 +1384,17 @@
     this.width = width;
     this.height = height;
     this.gNode = null;
+    this.pointPositionMap = null;
     this.init();
   }
 
   ConnectBox.prototype = {
     init: function() {
-      const imageHalfSize = 4, nodes = [];
+      this.gNode = this.createElement();
+      this.bindEvents();
+    },
+    createElement: function() {
+      const imageHalfSize = 4, nodes = [], posMap = {};
       const { x, y, width, height } = this;
       const points = {
         'top-mid': [x + (width / 2) - imageHalfSize, y - imageHalfSize],
@@ -1388,17 +1402,20 @@
         'mid-right': [x + width - imageHalfSize, y + height / 2 - imageHalfSize],
         'bottom-mid': [x + width / 2 - imageHalfSize, y + height - imageHalfSize]
       };
-      for (let value of Object.values(points)) {
+      for (let key of Object.keys(points)) {
+        const value = points[key];
         const pointGNode = createSVGElement('g');
         const image = createSVGElement('image');
         image.href.baseVal = IMAGE_SVG_URL.connect;
         setAttributes(image, {
+          id: key,
           x: value[0],
           y: value[1],
           width: imageHalfSize * 2,
           height: imageHalfSize * 2,
           'pointer-events': 'all'
         });
+        posMap[key] = [value[0] + imageHalfSize, value[1] + imageHalfSize];
         pointGNode.appendChild(image);
         nodes.push(pointGNode);
       }
@@ -1407,8 +1424,31 @@
       for (let node of nodes) {
         fragment.appendChild(node);
       }
+      setStyles(gNode, { cursor: 'crosshair' });
       gNode.appendChild(fragment);
-      this.gNode = gNode;
+      this.pointMap = posMap;
+      return gNode;
+    },
+    bindEvents: function() {
+      const { pointMap, gNode, x, y, width, height } = this;
+      const range = {
+        xLimit: [x, x + width],
+        yLimit: [y, y + height]
+      };
+      gNode.addEventListener('mousedown', e => {
+        const { pageX, pageY } = e;
+        const target = e.target;
+        const id = target.getAttribute('id');
+        const point = pointMap[id];
+        if (!point) return;
+        dispatchEvent(document, 'connectLine', {
+          startPoint: point,
+          startX: pageX,
+          startY: pageY,
+          limit: range,
+          direction: id.replace('-mid', '')
+        });
+      });
     }
   };
 
