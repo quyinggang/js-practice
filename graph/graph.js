@@ -1,12 +1,12 @@
 /**
- * 简易图形编辑：旨在学习相关思想
+ * 简易流程图：旨在学习相关思想，使用svg创建图形
  * - 支持拖拽、点击创建图形，只支持rect
  * - 支持快捷键delete删除图形
  * - 支持图形拖拽改变大小
  * - 支持图形画布内拖动
- * - 支持输入信息
- * - 支持简易连线逻辑
- * note: 图形旋转后改变大小、位置逻辑相对复杂，其背后涉及到较为复杂的数学计算，待研究补充
+ * - 支持输入信息，支持随着框位置和大小改变动态改变信息显示位置
+ * - 支持简易连线逻辑，支持随着框位置和大小改变动态改变连接点坐标
+ * 未来可研究方向: 图形旋转后改变大小、位置以及连线、调整框等逻辑，其中涉及到一些相对复杂的数学计算
  */
  (function(root) {
 
@@ -80,6 +80,14 @@
       height: 60
     },
     IMAGE: 18,
+  };
+
+  // 连接点
+  const CONNECT_POINT = {
+    top: 'top-mid',
+    bottom: 'bottom-mid',
+    left: 'left-mid',
+    right: 'right-mid'
   };
 
   const getUId = function() {
@@ -268,6 +276,16 @@
       //   x: x + width + 4,
       //   y: y - imageHalfSize * 2 - 4
       // }
+    };
+  };
+
+  // 计算每条边中心位置坐标
+  const computeSideCenterPosition = function(x, y, width, height) {
+    return {
+      [CONNECT_POINT.top]: [x + (width / 2), y],
+      [CONNECT_POINT.left]: [x, y + height / 2],
+      [CONNECT_POINT.right]: [x + width, y + height / 2],
+      [CONNECT_POINT.bottom]: [x + width / 2, y + height]
     };
   };
 
@@ -715,6 +733,9 @@
           const point = pointMap[action];
           setAttributes(imageNode, { x: point.x, y: point.y });
           graphInstance.updateEditTextPositionAndSize(targetShape);
+          dispatchEvent(document, 'resizingShape', {
+            id: targetShape.id
+          });
           action = tempAction;
         }
         startX = pageX;
@@ -744,6 +765,7 @@
       const lineShapeInstance = graphInstance.createLineShape();
       lineShapeInstance.updatePrevShape(shapeInstance);
       lineShapeInstance.updateStartPoint(startPoint);
+      lineShapeInstance.updateConnectPoint(direction);
       const onDraging = function(e) {
         if (!shapeContainerGNode.contains(lineShapeInstance.gNode)) {
           graphInstance.appendLineShape(lineShapeInstance);
@@ -763,6 +785,8 @@
         const connectBox = graphInstance.connectBox;
         if (target.tagName === 'image' && connectBox) {
           nextShape = connectBox.getConnectionShape();
+          const dir = target.getAttribute('id');
+          dir && lineShapeInstance.updateConnectedPoint(dir);
         } else if (target.parentNode.tagName === 'g') {
           const id = Number(target.parentNode.getAttribute('id'));
           if (!isNumber(id)) return;
@@ -1257,17 +1281,35 @@
       const shapeInstance = this;
       const { prevShape, nextShape } = shapeInstance;
       if (prevShape && prevShape.id === id) {
-        const startPoint = this.startPoint;
+        const startPoint = shapeInstance.startPoint;
         shapeInstance.updateStartPoint([
           startPoint[0] + offsetX,
           startPoint[1] + offsetY
         ]);
       } else if (nextShape && nextShape.id === id) {
-        const endPoint = this.endPoint;
+        const endPoint = shapeInstance.endPoint;
         shapeInstance.updateEndPoint([
           endPoint[0] + offsetX,
           endPoint[1] + offsetY
         ]);
+      }
+    },
+    onUpdatePositionFromResize: function(event) {
+      const { id } = event.detail;
+      const shapeInstance = this;
+      const { prevShape, nextShape, connectPoint, connectedPoint } = shapeInstance;
+      if (prevShape && prevShape.id === id) {
+        const { x, y, width, height } = prevShape;
+        const pointMap = computeSideCenterPosition(x, y, width, height);
+        const point = pointMap[connectPoint];
+        if (!point) return;
+        shapeInstance.updateStartPoint(point);
+      } else if (nextShape && nextShape.id === id) {
+        const { x, y, width, height } = nextShape;
+        const pointMap = computeSideCenterPosition(x, y, width, height);
+        const point = pointMap[connectedPoint];
+        if (!point) return;
+        shapeInstance.updateEndPoint(point);
       }
     },
     getPropFromKey: function(key) {
@@ -1288,6 +1330,9 @@
     this.endPoint = null;
     this.prevShape = null;
     this.nextShape = null;
+    // 标识连接点位置方向以便resize shape时重新计算位置坐标
+    this.connectPoint = null;
+    this.connectedPoint = null;
     this.init();
   }
 
@@ -1325,9 +1370,11 @@
       prototype.onClick = lineShapeHandler.onClick.bind(this);
       prototype.onCancelSelect = lineShapeHandler.onCancelSelect.bind(this);
       prototype.onUpdateLinePosition = lineShapeHandler.onUpdateLinePosition.bind(this);
+      prototype.onUpdatePositionFromResize = lineShapeHandler.onUpdatePositionFromResize.bind(this);
       document.addEventListener('keydown', this.onDelete);
       document.addEventListener('click', this.onCancelSelect);
       document.addEventListener('draggingShape', this.onUpdateLinePosition);
+      document.addEventListener('resizingShape', this.onUpdatePositionFromResize);
       gNode.addEventListener('click', this.onClick);
     },
     unbindEvents: function() {
@@ -1336,6 +1383,7 @@
       document.removeEventListener('keydown', this.onDelete);
       document.removeEventListener('click', this.onCancelSelect);
       document.removeEventListener('draggingShape', this.onUpdateLinePosition);
+      document.removeEventListener('resizingShape', this.onUpdatePositionFromResize);
     },
     activeShapeStatus: function(key) {
       const prop = rectShapeHandler.getPropFromKey(key);
@@ -1384,6 +1432,12 @@
         return;
       }
       this.nextShape = shape;
+    },
+    updateConnectPoint: function(dir) {
+      this.connectPoint = dir;
+    },
+    updateConnectedPoint: function(dir) {
+      this.connectedPoint = dir;
     },
     render: function() {
       const { startPoint, endPoint, gNode } = this;
@@ -1613,26 +1667,21 @@
     createElement: function() {
       const imageHalfSize = 4, nodes = [], posMap = {};
       const { x, y, width, height } = this;
-      const points = {
-        'top-mid': [x + (width / 2) - imageHalfSize, y - imageHalfSize],
-        'mid-left': [x - imageHalfSize, y + height / 2 - imageHalfSize],
-        'mid-right': [x + width - imageHalfSize, y + height / 2 - imageHalfSize],
-        'bottom-mid': [x + width / 2 - imageHalfSize, y + height - imageHalfSize]
-      };
-      for (let key of Object.keys(points)) {
-        const value = points[key];
+      const pointMap = computeSideCenterPosition(x, y, width, height);
+      for (let key of Object.keys(pointMap)) {
+        const value = pointMap[key];
         const pointGNode = createSVGElement('g');
         const image = createSVGElement('image');
         image.href.baseVal = IMAGE_SVG_URL.connect;
         setAttributes(image, {
           id: key,
-          x: value[0],
-          y: value[1],
+          x: value[0] - imageHalfSize,
+          y: value[1] - imageHalfSize,
           width: imageHalfSize * 2,
           height: imageHalfSize * 2,
           'pointer-events': 'all'
         });
-        posMap[key] = [value[0] + imageHalfSize, value[1] + imageHalfSize];
+        posMap[key] = [value[0], value[1]];
         pointGNode.appendChild(image);
         nodes.push(pointGNode);
       }
@@ -1663,7 +1712,7 @@
           startPoint: point,
           limit: range,
           shape: connectionShape,
-          direction: id.replace('-mid', '')
+          direction: id
         });
       });
     },
