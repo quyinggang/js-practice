@@ -326,6 +326,7 @@
       initShapeSize = null;
     const dragingShape = document.getElementById('shape--draging');
     const { left: contentLeft } = contentNode.getBoundingClientRect();
+    const scrollNode = contentNode.children[1];
 
     registerDrag(
       sideNode,
@@ -354,6 +355,8 @@
       function onDragEnd() {
         setStyles(dragingShape, { display: 'none', top: 0, left: 0});
         let { left: posX, top: posY } = canvasData;
+        const scrollTop  = scrollNode.scrollTop;
+        const scrollLeft = scrollNode.scrollLeft;
         // 放弃side DOM上click事件，使用标识符来判断做处理
         if (isDragEvent) {
           if (dragPositionX < contentLeft) return;
@@ -363,8 +366,8 @@
           ];
           // 拖拽矩形长度和宽度，注意svg默认坐标系统
           if (dragPositionX >= limitRange[0] && dragPositionY >= limitRange[1]) {
-            posX = dragPositionX - limitRange[0];
-            posY = dragPositionY - limitRange[1];
+            posX = dragPositionX - limitRange[0] + scrollLeft;
+            posY = dragPositionY - limitRange[1] + scrollTop;
           }
         } else {
           posX = initShapeSize.width
