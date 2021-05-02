@@ -499,6 +499,11 @@
         const newY = current[1] <= 0 ? 0 : current[1];
         shapeInstance.updatePositionAndSize(newX, newY);
         graphInstance.resizeResizeBox(newX, newY);
+        dispatchEvent(document, 'draggingShape', {
+          id: shapeInstance.id,
+          offsetX: xRatio,
+          offsetY: yRatio
+        });
         startX = pageX;
         startY = pageY;
       };
@@ -508,6 +513,7 @@
         if (!shapeInstance.getShapeStatus('drag')) return;
         isDragging = false;
         graphInstance.createResizeBox(shapeInstance);
+        shapeInstance.effectShapeStatus('drag')
       };
       document.addEventListener('mousemove', onDraging);
       document.addEventListener('mouseup', onDragEnd);
@@ -1036,9 +1042,6 @@
     onClick: function(event) {
       event.stopPropagation();
       const shapeInstance = this;
-      if (shapeInstance.getShapeStatus('drag')) {
-        return shapeInstance.effectShapeStatus('drag');
-      }
       if (shapeInstance.getShapeStatus('edit')) {
         return;
       }
@@ -1249,6 +1252,24 @@
       shapeInstance.effectShapeStatus('select');
       dispatchEvent(document, 'cancalSelectedLine');
     },
+    onUpdateLinePosition: function(event) {
+      const { id, offsetX, offsetY } = event.detail;
+      const shapeInstance = this;
+      const { prevShape, nextShape } = shapeInstance;
+      if (prevShape && prevShape.id === id) {
+        const startPoint = this.startPoint;
+        shapeInstance.updateStartPoint([
+          startPoint[0] + offsetX,
+          startPoint[1] + offsetY
+        ]);
+      } else if (nextShape && nextShape.id === id) {
+        const endPoint = this.endPoint;
+        shapeInstance.updateEndPoint([
+          endPoint[0] + offsetX,
+          endPoint[1] + offsetY
+        ]);
+      }
+    },
     getPropFromKey: function(key) {
       let prop = key;
       switch(key) {
@@ -1303,8 +1324,10 @@
       prototype.onDelete = lineShapeHandler.onDelete.bind(this);
       prototype.onClick = lineShapeHandler.onClick.bind(this);
       prototype.onCancelSelect = lineShapeHandler.onCancelSelect.bind(this);
+      prototype.onUpdateLinePosition = lineShapeHandler.onUpdateLinePosition.bind(this);
       document.addEventListener('keydown', this.onDelete);
       document.addEventListener('click', this.onCancelSelect);
+      document.addEventListener('draggingShape', this.onUpdateLinePosition);
       gNode.addEventListener('click', this.onClick);
     },
     unbindEvents: function() {
@@ -1312,6 +1335,7 @@
       gNode.removeEventListener('click', this.onClick);
       document.removeEventListener('keydown', this.onDelete);
       document.removeEventListener('click', this.onCancelSelect);
+      document.removeEventListener('draggingShape', this.onUpdateLinePosition);
     },
     activeShapeStatus: function(key) {
       const prop = rectShapeHandler.getPropFromKey(key);
