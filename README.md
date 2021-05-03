@@ -121,5 +121,4 @@ JavaScript实践案例
 ![视觉差效果浅析](./images/cropper.png)   
 
 #### 简易流程图处理   
-![简易流程图处理](./images/graph.gif);
-
+![简易流程图处理](./images/graph.gif)   
