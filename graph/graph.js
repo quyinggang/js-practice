@@ -11,23 +11,12 @@
  (function(root) {
 
   let uid = 0;
-  const dragFlag = {
-    isRotateDrag: false,
-    isDragInCanvas: false,
-    isResizeDrag: false,
-    isEditing: false
-  };
 
   const TEMPLATE = `
     <aside class="side">
       <div class="graph-container">
         <svg class="svg">
           <g><rect x="1.44" y="7.68" width="28.8" height="14.4" fill="#ffffff" stroke="#000000" stroke-width="1.3" pointer-events="all"></rect></g>
-        </svg>
-      </div>
-      <div class="graph-container">
-        <svg class="svg">
-          <g><rect x="1.44" y="7.68" width="28.8" height="14.4" rx="2.16" ry="2.16" fill="#ffffff" stroke="#000000" stroke-width="1.3" pointer-events="all"></rect></g>
         </svg>
       </div>
     </aside>
@@ -754,7 +743,7 @@
 
   const bindEventsOfConnectLine = function() {
     const graphInstance = this;
-    const { shapeContainerGNode } = graphInstance;
+    const { shapeContainerGNode, resizeContainerGNode } = graphInstance;
      // connect shape
     document.addEventListener('connectLine', function(event) {
       const {
@@ -778,7 +767,7 @@
       const onDragEnd = function(e) {
         const target = e.target;
         if (!isSVGElement(target)) {
-          shapeContainerGNode.removeLineShape(lineShapeInstance);
+          graphInstance.removeLineShape(lineShapeInstance);
           return;
         }
         let nextShape = null;
@@ -811,6 +800,44 @@
       const { id, node } = event.detail;
       node && shapeContainerGNode.removeChild(node);
       graphInstance.shapeMap.delete(id);
+      graphInstance.destoryResizeContainerContent();
+    });
+
+    document.addEventListener('cancalSelectedLine', function() {
+      graphInstance.destoryResizeContainerContent();
+    });
+
+    document.addEventListener('selectLineShape', function(event) {
+      const { shapeInstance } = event.detail;
+      graphInstance.destoryResizeBox();
+      const lineResizeBox = new LineShapeResizeBox(shapeInstance);
+      resizeContainerGNode.appendChild(lineResizeBox.gNode);
+    });
+
+    // drag lineShape
+    document.addEventListener('dragLineShape', function(event) {
+      const { top, left } = graphInstance.canvasData;
+      const { shapeInstance: lineResizeBox } = event.detail;
+      const lineShape = lineResizeBox.lineShape;
+      let isDragging = false, endX = null, endY = null;
+      lineResizeBox.hiddenResizePoint();
+      const onDraging = function(e) {
+        isDragging = true;
+        lineShape.activeShapeStatus('drag');
+        const { pageX, pageY } = e;
+        endX = pageX - left;
+        endY = pageY - top;
+        lineResizeBox.updatePosition(endX, endY);
+      };
+      const onDragEnd = function() {
+        document.removeEventListener('mousemove', onDraging);
+        document.removeEventListener('mouseup', onDragEnd);
+        if (!isDragging) return;
+        lineShape.updateEndPoint([endX, endY]);
+        lineResizeBox.displayResizePoint();
+      };
+      document.addEventListener('mousemove', onDraging);
+      document.addEventListener('mouseup', onDragEnd);
     });
   };
 
@@ -1273,6 +1300,9 @@
       const target = event.target;
       // 只有点击绘图区才触发
       if (target.tagName !== 'svg') return;
+      if (shapeInstance.getShapeStatus('drag')) {
+        return shapeInstance.effectShapeStatus('drag');
+      }
       shapeInstance.effectShapeStatus('select');
       dispatchEvent(document, 'cancalSelectedLine');
     },
@@ -1316,6 +1346,7 @@
       let prop = key;
       switch(key) {
         case 'select': prop = 'isSelected';break;
+        case 'drag': prop = 'isDrag';break;
       }
       return prop;
     }
@@ -1324,7 +1355,9 @@
     this.uid = uid;
     this.type = 'line';
     this.isSelected = false;
+    this.isDrag = false;
     this.gNode = null;
+    this.dashLineNode = null;
     this.lineNode = null;
     this.startPoint = null;
     this.endPoint = null;
@@ -1344,8 +1377,15 @@
     },
     createElement: function() {
       const gNode = createSVGElement('g');
+      const backPathNode = createSVGElement('path');
       const pathNode = createSVGElement('path');
       const dirNode = createSVGElement('path');
+      setAttributes(backPathNode, {
+        fill: 'none',
+        'stroke-width': 5,
+        'visibility': 'hidden',
+        'pointer-events': 'stroke'
+      });
       setAttributes(pathNode, {
         fill: 'none',
         stroke: '#000',
@@ -1359,6 +1399,7 @@
         'stroke-miterlimit': 10,
         'pointer-events': 'none'
       });
+      gNode.appendChild(backPathNode);
       gNode.appendChild(pathNode);
       gNode.appendChild(dirNode);
       return gNode;
@@ -1386,30 +1427,20 @@
       document.removeEventListener('resizingShape', this.onUpdatePositionFromResize);
     },
     activeShapeStatus: function(key) {
-      const prop = rectShapeHandler.getPropFromKey(key);
+      const prop = lineShapeHandler.getPropFromKey(key);
       if (this.hasOwnProperty(prop)) {
         this[prop] = true;
       }
     },
     effectShapeStatus: function(key) {
-      const prop = rectShapeHandler.getPropFromKey(key);
+      const prop = lineShapeHandler.getPropFromKey(key);
       if (this.hasOwnProperty(prop)) {
         this[prop] = false;
       }
     },
     getShapeStatus: function(key) {
-      const prop = rectShapeHandler.getPropFromKey(key);
+      const prop = lineShapeHandler.getPropFromKey(key);
       return !!this[prop];
-    },
-    createShadowLine: function() {
-      const gNode = this.gNode;
-      const shadowLine = gNode.cloneNode(true);
-      setAttributes(shadowLine, {
-        stroke: '#00a8ff',
-        'stroke-dasharray': '3 3',
-        'pointer-events': 'none'
-      });
-      return shadowLine;
     },
     updateStartPoint: function(point) {
       if (!Array.isArray(point) || point.length !== 2) return;
@@ -1441,12 +1472,13 @@
     },
     render: function() {
       const { startPoint, endPoint, gNode } = this;
-      const [ lineNode, dirNode ] = gNode.children;
+      const [ backNode, lineNode, dirNode ] = gNode.children;
       if (lineNode && startPoint && endPoint) {
         const [x, y] = startPoint;
         const [x1, y1] = endPoint;
         const dAttr = `M${x} ${y} L${x1} ${y1}`;
-        const angle = Math.atan2(y1 - y, x1 - x) * 180 / Math.PI;
+        const angle = Math.round(Math.atan2(y1 - y, x1 - x) * 180 / Math.PI);
+        setAttributes(backNode, { d: dAttr });
         setAttributes(lineNode, { d: dAttr });
         setAttributes(dirNode, {
           d: `M${x1} ${y1} L${x1 - 3.5} ${y1 - 7} L${x1} ${y1 - 5.25} L${x1 + 3.5} ${y1 - 7}Z`,
@@ -1454,7 +1486,94 @@
         });
       }
     }
+  };
+
+  const LineShapeResizeHanlder = {
+    onMouseDown: function(e) {
+      const shapeInstance = this;
+      dispatchEvent(document, 'dragLineShape', { shapeInstance });
+    }
+  };
+
+  function LineShapeResizeBox(lineShape) {
+    this.lineShape = lineShape;
+    this.gNode = null;
+    this.init();
   }
+  
+  LineShapeResizeBox.prototype = {
+    init: function() {
+      const gNode = this.createElement();
+      this.gNode = gNode;
+      this.bindEvents();
+    },
+    createElement: function() {
+      const lineShape = this.lineShape;
+      const endPoint = lineShape.endPoint;
+      const pathGNode = lineShape.gNode.cloneNode(true);
+      pathGNode.removeChild(pathGNode.firstChild);
+      const [ lineNode, dirNode ] = pathGNode.children;
+      setAttributes(lineNode, {
+        stroke: '#00a8ff',
+        'stroke-dasharray': '3 3',
+        'pointer-events': 'none'
+      });
+      setAttributes(dirNode, {
+        fill: 'none',
+        stroke: '#00a8ff',
+        'stroke-dasharray': '3 3',
+        'pointer-events': 'none'
+      });
+      const gNode = createSVGElement('g');
+      const resizeNode = createSVGElement('g');
+      const image = createSVGElement('image');
+      const imageHalfSize = SHAPE_SIZE.IMAGE / 2;
+      image.href.baseVal = IMAGE_SVG_URL.resize;
+      setAttributes(image, {
+        x: endPoint[0] - imageHalfSize,
+        y: endPoint[1] - imageHalfSize,
+        width: imageHalfSize * 2,
+        height: imageHalfSize * 2,
+        'pointer-events': 'all'
+      });
+      setStyles(resizeNode, { cursor: 'move' });
+      resizeNode.appendChild(image);
+      gNode.appendChild(pathGNode);
+      gNode.appendChild(resizeNode);
+      return gNode;
+    },
+    bindEvents: function() {
+      const prototype = LineShapeResizeBox.prototype;
+      prototype.onMouseDown = LineShapeResizeHanlder.onMouseDown.bind(this);
+      this.gNode.addEventListener('mousedown', this.onMouseDown);
+    },
+    updatePosition: function(x1, y1) {
+      const [x, y] = this.lineShape.startPoint;
+      const gNode = this.gNode;
+      const [pathNode, dirNode] = gNode.children[0].children;
+      const imageNode = gNode.children[1].children[0];
+      const dAttr = `M${x} ${y} L${x1} ${y1}`;
+      const angle = Math.round(Math.atan2(y1 - y, x1 - x) * 180 / Math.PI);
+      setAttributes(pathNode, { d: dAttr });
+      setAttributes(dirNode, {
+        d: `M${x1} ${y1} L${x1 - 3.5} ${y1 - 7} L${x1} ${y1 - 5.25} L${x1 + 3.5} ${y1 - 7}Z`,
+        transform: `rotate(${angle - 90},${x1},${y1})`
+      });
+      const imageHalfSize = SHAPE_SIZE.IMAGE / 2;
+      setAttributes(imageNode, {
+        x: x1 - imageHalfSize,
+        y: y1 - imageHalfSize
+      });
+    },
+    hiddenResizePoint: function() {
+      const imageGNode = this.gNode.children[1];
+      hiddenDom(imageGNode);
+    },
+    displayResizePoint: function() {
+      const imageGNode = this.gNode.children[1];
+      displayDom(imageGNode);
+    }
+  };
 
   function TextBox(x, y, dx, dy, text) {
     this.x = x;
