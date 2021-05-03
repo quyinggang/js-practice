@@ -1323,6 +1323,11 @@
           endPoint[1] + offsetY
         ]);
       }
+      // 销毁拖拽时选中line shape外框
+      if (shapeInstance.getShapeStatus('select')) {
+        shapeInstance.effectShapeStatus('select');
+        dispatchEvent(document, 'cancalSelectedLine');
+      }
     },
     onUpdatePositionFromResize: function(event) {
       const { id } = event.detail;

@@ -120,3 +120,6 @@ JavaScript实践案例
 裁剪框大小更改逻辑和输出裁剪图片   
 ![视觉差效果浅析](./images/cropper.png)   
 
+#### 简易流程图处理   
+![简易流程图处理](./images/graph.gif);
+
