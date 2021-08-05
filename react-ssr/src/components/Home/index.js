@@ -4,7 +4,6 @@ import { getHomeListData } from './actions';
 
 class Home extends React.Component {
   render() {
-    console.log('home')
     const { list, onPrevPage, onNextPage, currentPage } = this.props;
     return (
       <div>

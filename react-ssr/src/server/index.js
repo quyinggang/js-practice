@@ -8,7 +8,7 @@ app.use('/static', express.static('public'));
 
 app.get('*', (req, res) => {
   const context = {};
-  const htmlContent = renderServerHtmlContent(req.path, context);
+  const htmlContent = renderServerHtmlContent(req.url, context);
   if (context.status) {
     res.status(context.status);
   }
