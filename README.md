@@ -124,5 +124,4 @@ JavaScript实践案例
 ![简易流程图处理](./images/graph.gif)   
 
 #### react-ssr   
-关于react同构的入门级demo，可以了解SSR原理、react-redux、redux、redux-thunk中间件的整合流程、react-router与react-router-config的使用   
-
+react同构的入门级demo，可以了解SSR原理、react-redux、redux、redux-thunk中间件的整合流程、react-router与react-router-config的使用、Node Express简单使用   
