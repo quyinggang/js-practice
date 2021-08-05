@@ -1,0 +1,42 @@
+{
+  "name": "react-ssr",
+  "version": "1.0.0",
+  "description": "ssr",
+  "main": "app.js",
+  "scripts": {
+    "dev": "npm-run-all -p dev:**",
+    "dev:start": "nodemon --watch dist --exec node ./dist/bundle.js",
+    "dev:build-server": "webpack --config webpack.server.js --watch --mode=development",
+    "dev:build-client": "webpack --config webpack.client.js --watch --mode=development",
+    "build:server": "webpack --config webpack.server.js --mode=production",
+    "build:client": "webpack --config webpack.client.js --mode=production",
+    "build:all": "npm run build:server && npm run build:client"
+  },
+  "keywords": [
+    "ssr"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "express": "^4.17.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-router-config": "^5.1.1",
+    "react-router-dom": "^5.2.0",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.8",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.14.5",
+    "babel-loader": "^8.2.2",
+    "nodemon": "^2.0.12",
+    "npm-run-all": "^4.1.5",
+    "webpack": "^5.48.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-merge": "^5.8.0",
+    "webpack-node-externals": "^3.0.0"
+  }
+}
