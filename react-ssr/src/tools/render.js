@@ -33,7 +33,8 @@ const renderServerHtmlContent = function(path, context) {
   /*
     需要注意renderToString处理，只会渲染根路由对应的组件（即组件的render函数会被调用），
     之后子路由匹配的组件的渲染会被客户端接管；
-    服务端渲染中路由的处理跟react-router-config的renderRoutes存在关联，当组件渲染时其内部存在renderRoutes就会触发路由组件本身的渲染
+    服务端渲染中路由的处理跟react-router-config的renderRoutes存在关联，当组件渲染时其内部存在renderRoutes就会触发路由组件本身的渲染，
+    需要注意props中staticContext的使用
   */
   const content = renderToString((
     <Provider store={store}>
