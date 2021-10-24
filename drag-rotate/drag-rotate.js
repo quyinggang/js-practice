@@ -59,9 +59,11 @@
     },
     getRotateAngle: function(x, y) {
       const [ pointX, pointY ] = this.point;
+      const diffY = pointY - y
+      const diffX = pointX - x
       // https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2
-      const angle = Math.atan2(y - pointY, x - pointX) * 180 / Math.PI;
-      return angle;
+      const angle = Math.atan2(diffY, diffX) * 180 / Math.PI;
+      return Math.round(angle)
     },
     render: function() {
       const angle = this.rotateAngle;
