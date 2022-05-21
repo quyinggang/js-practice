@@ -131,5 +131,5 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 ![rotate-resize](./images/moveable.png)  
 
 #### zoomable   
-主要用于理解按照鼠标当前位置缩放内容保证相对位置不变逻辑   
+主要用于理解按照鼠标当前位置缩放内容实现相对位置不变的计算逻辑   
 
