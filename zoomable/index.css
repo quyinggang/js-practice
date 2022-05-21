@@ -1,0 +1,22 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #E5E5E5;
+}
+
+.zoom-container {
+  position: absolute;
+  width: 768px;
+  height: 432px;
+  background: #fff;
+}
+
+.zoom-container .image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

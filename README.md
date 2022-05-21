@@ -128,4 +128,8 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 
 #### moveable   
 主要用于学习rotate后resize，核心是坐标计算相关逻辑    
-![rotate-resize](./images/moveable.png)    
+![rotate-resize](./images/moveable.png)  
+
+#### zoomable   
+主要用于理解按照鼠标当前位置缩放内容保证相对位置不变逻辑   
+
