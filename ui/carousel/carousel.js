@@ -1,12 +1,10 @@
 ;(function(root) {
-  let carousel = null;
   const document = root.document;
   const { on, addClass, removeClass } = tools;
   const classes = {
     animating: 'is-animating',
     active: 'is-active'
   };
-  let timer = null;
 
   /**
    * 改变index, 计算相应的translate偏移量（核心）
@@ -134,17 +132,17 @@
     // 左右切换事件绑定
     on: function() {
       const that = this;
-      const _traggle = throttle(300, true, type => {
+      const trigger = throttle(300, true, type => {
         type === 'left' ? that.prev() : that.next();
       });
       on(this.leftDom, {
         'click': function() {
-          _traggle('left');
+          trigger('left');
         }
       });
       on(this.rightDom, {
         'click': function() {
-          _traggle('right');
+          trigger('right');
         }
       });
     },
@@ -164,7 +162,7 @@
     },
     clear: function() {
       const { activeIndex } = this;
-      // 移除除了当前actiev之外的所有is-animating类
+      // 移除除了当前active之外的所有is-animating类
       this.items.forEach(item => {
         !item.isActive ? removeClass(item.dom, classes.animating) : null;
         item.isActive = activeIndex === item.index;
@@ -178,11 +176,11 @@
     // 设置轮播项位置：无缝切换等效果在此处理
     setItemsPosition: function() {
       const { activeIndex, items, indicators } = this;
-      const targetIndircator = indicators[activeIndex];
+      const targetIndicator = indicators[activeIndex];
       this.clear();
       items[activeIndex].isActive = true;
-      targetIndircator.isActive = true;
-      targetIndircator.setActive();
+      targetIndicator.isActive = true;
+      targetIndicator.setActive();
       items.forEach(item => {
         item.computedTranslate();
         item.isActive ? addClass(item.dom, classes.animating) : null;

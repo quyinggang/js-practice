@@ -71,12 +71,10 @@
 		updatePanel: function() {
 			const value = `hsl(${this.value},100%,50%)`;
 			this.colorPanel.dom.style.cssText = `background: ${value}`;
-			console.log(value);
 		},
 		updateBtn: function() {
 			const value = `hsla(${this.value},100%,50%,${this.alpha})`;
 			btn.style.cssText = `background: ${value}`;
-			console.log(value);
 		},
 		changeValue: function(value) {
 			this.value = value;
@@ -92,7 +90,6 @@
 			const value = this.value;
 			const cssText = `background:linear-gradient(to right, hsla(${value},100%,50%,0) 0%, hsla(${value},100%,50%,1) 100%)`;
 			this.alphaSlider.dom.children[0].style.cssText = cssText;
-			console.log(cssText);
 		}
 	};
 
