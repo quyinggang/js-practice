@@ -1,4 +1,5 @@
 .DS_Store
 node_modules
-react-ssr/dist
-react-ssr/public
+dist
+public
+.vscode
