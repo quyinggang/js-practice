@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字滚动效果</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div id="root">
+    <button id="btn">改变数值</button>
+    <span id="number"></span>
+  </div>
+  <script type="module">
+    import CountUp from './index.js'
+    const countUp = new CountUp(document.getElementById('number'), 4000.34)
+    const btn = document.getElementById('btn')
+    btn.addEventListener('click', () => {
+      countUp.update(Math.random() * 1000)
+    })
+  </script>
+</body>
+</html>
