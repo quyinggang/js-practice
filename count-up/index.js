@@ -2,6 +2,9 @@
 
 class CountUp {
   constructor($el, endValue, config) {
+    if (!($el instanceof HTMLElement)) {
+      throw new Error('非法节点')
+    }
     this.$el = $el
     this.endValue = this.validateNumber(endValue)
     this.startValue = 0

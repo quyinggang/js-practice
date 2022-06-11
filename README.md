@@ -136,4 +136,7 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 了解骨架屏效果   
 
 #### count-up   
-了解数字滚动动画效果
+了解数字滚动动画效果    
+
+#### seamless-scroll 
+了解无缝循环滚动效果  
