@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无缝循环滚动</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div id="root">
+    <div class="demo1">
+      <ul class="ul" id="demo">
+        <li class="li">行1</li>
+        <li class="li">行2</li>
+        <li class="li">行3</li>
+        <li class="li">行4</li>
+        <li class="li">行5</li>
+        <li class="li">行6</li>
+      </ul>
+    </div>
+  </div>
+  <script type="module">
+    import SeamlessScroll from './index.js'
+    new SeamlessScroll(document.getElementById('demo'), {
+      step: 1,
+      interval: true,
+      distance: 40, // 每滚动40px停顿1s
+      wait: 1000
+    })
+  </script>
+</body>
+</html>
