@@ -140,3 +140,6 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 
 #### seamless-scroll 
 了解无缝循环滚动效果  
+
+#### dynamic-theme   
+实现动态主题   
