@@ -8,9 +8,17 @@
   <link rel="stylesheet" href="./index.css">
 </head>
 <body>
+  <div id="zoom">
+    <img class="image" src="https://tse1-mm.cn.bing.net/th/id/R-C.5bad3460c502d864fbba90bdabbbb6ce?rik=k6V%2bk0v8pM%2f0HA&riu=http%3a%2f%2fi.loli.net%2f2020%2f02%2f21%2fp5xi2MvnRt3zoDy.jpg&ehk=vrXS1c4Z7s1gdWHNLNlbZTKbuipqYciCF9Hi81LWLdM%3d&risl=&pid=ImgRaw&r=0" />
+  </div>
+  <!-- <svg class="svg">
+    <g id="zoom">
+      <image xlink:href="https://tse1-mm.cn.bing.net/th/id/R-C.5bad3460c502d864fbba90bdabbbb6ce?rik=k6V%2bk0v8pM%2f0HA&riu=http%3a%2f%2fi.loli.net%2f2020%2f02%2f21%2fp5xi2MvnRt3zoDy.jpg&ehk=vrXS1c4Z7s1gdWHNLNlbZTKbuipqYciCF9Hi81LWLdM%3d&risl=&pid=ImgRaw&r=0" x="0" y="0" width="384" height="262" />
+    </g>
+  </svg> -->
   <script type="module">
     import Zoomable from './index.js'
-    new Zoomable(document.body)
+    new Zoomable(document.getElementById('zoom'))
   </script>
 </body>
 </html>
