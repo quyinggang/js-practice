@@ -388,7 +388,6 @@
           });
         }
         renderGameFrame() {
-          if (this.state === STATE_ALIAS.over) return;
           clearGame();
           this.bulletRate += 1;
           // 控制当前页面上敌机数量限制
@@ -408,6 +407,7 @@
           this.hitEnemy();
           this.renderScore();
           this.checkIsGameOver();
+          if (this.state === STATE_ALIAS.over) return;
           this.raf = requestAnimationFrame(this.renderGameFrame.bind(this));
         }
         startCountDown() {
