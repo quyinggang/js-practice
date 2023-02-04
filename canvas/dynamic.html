@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>动态离子</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #canvas {
+        width: 600px;
+        height: 400px;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="2400" height="1600"></canvas>
+    <script>
+      const canvasElement = document.getElementById('canvas');
+      const ctx = canvasElement.getContext('2d');
+
+      const circleList = [];
+      const canvasSize = {
+        width: 2400,
+        height: 1600
+      }
+
+      class Circle {
+        constructor(x, y, radius, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.color = color;
+          this.dx = Math.random();
+          this.dy = Math.random();
+        }
+        update(data) {
+          this.x = data.x;
+          this.y = data.y;
+          this.dx = data.dx;
+          this.dy = data.dy;
+        }
+        render() {
+          const { x, y, radius, color } = this
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+
+      class Line {
+        constructor(start, end) {
+          this.start = start;
+          this.end = end;
+          this.lineWidth = 4;
+        }
+        render() {
+          const { start, end, lineWidth } = this
+          const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
+          gradient.addColorStop(0, start.color);
+          gradient.addColorStop(1, end.color);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = lineWidth;
+          ctx.beginPath();
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(end.x, end.y);
+          ctx.stroke();
+          ctx.closePath();
+        }
+      }
+
+      const getRandomColor = () => {
+          const type = '0123456789ABCDEF';
+          const len = type.length - 1;
+          let color = '#';
+          for (let index = 0; index < 6; index++) {
+            const typeIndex = Math.ceil(Math.random() * len)
+            color += type[typeIndex];
+          }
+          return color;
+        };
+
+      const initCircleList = () => {
+        for (let index = 0; index < 20; index++) {
+          const radius = Math.max(Math.random() * 30, 10);
+          const halfSize = radius / 2;
+          let x = Math.random() * canvasSize.width;
+          let y = Math.random() * canvasSize.height;
+          x = Math.max(halfSize, Math.min(x, canvasSize.width - halfSize));
+          y = Math.max(halfSize, Math.min(y, canvasSize.height - halfSize));
+          const color = getRandomColor();
+          const circle = new Circle(x, y, radius, color);
+          circleList.push(circle)
+        }
+      }
+
+      const renderFrame = () => {
+        ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
+        for (let index = 0, len = circleList.length; index < len; index++) {
+          const circle = circleList[index];
+          const radius = circle.radius;
+          const diff = {
+            x: circle.x < (canvasSize.width - radius) && circle.x > radius ? circle.dx : -circle.dx,
+            y: circle.y < (canvasSize.height - radius) && circle.y > radius ? circle.dy : -circle.dy
+          }
+          const newPosition = {
+            x: circle.x + diff.x,
+            y: circle.y + diff.y,
+            dx: diff.x,
+            dy: diff.y
+          }
+          for (let sIndex = 0; sIndex < len; sIndex++) {
+            if (sIndex !== index) {
+              const otherCircle = circleList[sIndex];
+              const diff = {
+                x: circle.x - otherCircle.x,
+                y: circle.y - otherCircle.y
+              }
+              const distance = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+              if (distance <= 600) {
+                const start = {
+                  x: circle.x,
+                  y: circle.y,
+                  color: circle.color
+                }
+                const end = {
+                  x: otherCircle.x,
+                  y: otherCircle.y,
+                  color: otherCircle.color
+                }
+                const line = new Line(start, end);
+                line.render()
+              }
+            }
+          }
+          circle.update(newPosition);
+          circle.render();
+        }
+
+        window.requestAnimationFrame(renderFrame);
+      }
+
+      initCircleList();
+      renderFrame();
+    </script>
+  </body>
+</html>

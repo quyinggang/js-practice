@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>贪吃蛇</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #canvas {
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+      const canvasElement = document.getElementById("canvas");
+      const ctx = canvasElement.getContext("2d");
+      let timer = null;
+      const SIZE = 20;
+      const CANVAS_WIDTH = 800;
+      const CANVAS_HEIGHT = 600;
+      const SNAKE_HEAD_COLOR = "red";
+      const SNAKE_BODY_COLOR = "gray";
+      const DIRECTION_ALIAS = {
+        up: 0,
+        right: 1,
+        down: 2,
+        left: 3,
+      };
+      const clearTimer = () => {
+        timer && clearInterval(timer);
+      };
+      const getNumberInRange = (min, max) => {
+        const range = max - min;
+        const r = Math.random();
+        return Math.round(r * range + min);
+      };
+      const getRandomColor = () => {
+        const type = '0123456789ABCDEF';
+        const len = type.length - 1;
+        let color = '#';
+        for (let index = 0; index < 6; index++) {
+          const typeIndex = Math.ceil(Math.random() * len);
+          color += type[typeIndex];
+        }
+        return color;
+      };
+
+      class Rect {
+        constructor(x, y, w, h, color) {
+          this.x = x;
+          this.y = y;
+          this.w = w;
+          this.h = h;
+          this.color = color;
+        }
+        draw() {
+          const { x, y, w, h, color } = this;
+          ctx.save();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeRect(x, y, w, h);
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+
+      class Snake {
+        constructor() {
+          const parts = [];
+          for (let index = 0; index < 4; index++) {
+            const rect = new Rect(20 * index, 0, SIZE, SIZE, SNAKE_BODY_COLOR);
+            parts.splice(0, 0, rect);
+          }
+          const head = parts[0];
+          head.color = SNAKE_HEAD_COLOR;
+          this.head = head;
+          this.snakeParts = parts;
+          this.direction = DIRECTION_ALIAS.right;
+          this.isEatFood = false;
+        }
+        draw() {
+          this.snakeParts.forEach((item) => {
+            item.draw();
+          });
+        }
+        move() {
+          const { head, direction, snakeParts, isEatFood } = this;
+          /*
+            贪吃蛇移动的逻辑：
+            - 依据头部坐标创建一个身体方块，并去除尾部方块
+            - 按照移动方向变更头部坐标
+          */
+          const rect = new Rect(
+            head.x,
+            head.y,
+            head.w,
+            head.h,
+            SNAKE_BODY_COLOR
+          );
+          snakeParts.splice(1, 0, rect);
+          // 吃掉食物不需要去尾逻辑
+          !isEatFood && snakeParts.pop();
+          switch (direction) {
+            case DIRECTION_ALIAS.up:
+              head.y -= head.h;
+              break;
+            case DIRECTION_ALIAS.right:
+              head.x += head.w;
+              break;
+            case DIRECTION_ALIAS.down:
+              head.y += head.h;
+              break;
+            case DIRECTION_ALIAS.left:
+              head.x -= head.w;
+              break;
+          }
+        }
+        setIsEat(isEat) {
+          this.isEatFood = isEat;
+        }
+      }
+
+      class Food {
+        constructor(snake) {
+          this.snake = snake;
+          const { x, y } = this.computeRandomPosition();
+          const color = getRandomColor();
+          this.rect = new Rect(x, y, SIZE, SIZE, color);
+        }
+        computeRandomPosition() {
+          let x = null;
+          let y = null;
+          let isOnSnake = true;
+          const snakeParts= this.snake.snakeParts;
+          while (isOnSnake) {
+            x = getNumberInRange(0, CANVAS_WIDTH / 20 - 1);
+            y = getNumberInRange(0, CANVAS_HEIGHT / 20 - 1);
+            isOnSnake = snakeParts.some(
+              (item) => item.x === x && item.y === y
+            );
+          }
+          return { x: x * SIZE, y: y * SIZE };
+        }
+        get x() {
+          return this.rect.x;
+        }
+        get y() {
+          return this.rect.y;
+        }
+        draw() {
+          this.rect.draw();
+        }
+      }
+
+      const snake = new Snake();
+      let food = new Food(snake);
+
+      const checkIsEatFood = () => {
+        const { head } = snake;
+        return head.x === food.x && head.y === food.y;
+      }
+      const renderFrame = () => {
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        // 投放食物
+        food.draw();
+        const isEat = checkIsEatFood();
+        snake.setIsEat(isEat);
+        snake.move();
+        snake.draw();
+        // 构建新的食物
+        if (isEat) {
+          food = new Food(snake);
+        }
+      };
+      const checkIsGameOver = () => {
+        const { head, snakeParts } = snake;
+        const isOverBoundary =
+          head.x < 0 ||
+          head.x >= CANVAS_WIDTH ||
+          head.y < 0 ||
+          head.y >= CANVAS_HEIGHT;
+        const isHitSelf = snakeParts.slice(1).some((item) => {
+          return item.x === head.x && item.y === head.y;
+        });
+        return isOverBoundary || isHitSelf;
+      };
+      const handleKeydown = (event) => {
+        event.preventDefault();
+        const { up, right, down, left } = DIRECTION_ALIAS;
+        const currentDir = snake.direction;
+        switch (event.keyCode) {
+          case 87:
+            if (currentDir !== down) {
+              snake.direction = up;
+            }
+            break;
+          case 68:
+            if (currentDir !== left) {
+              snake.direction = right;
+            }
+            break;
+          case 83:
+            if (currentDir !== up) {
+              snake.direction = down;
+            }
+            break;
+          case 65:
+            if (currentDir !== right) {
+              snake.direction = left;
+            }
+            break;
+        }
+      };
+
+      document.onkeydown = handleKeydown;
+      timer = setInterval(() => {
+        const isGameOver = checkIsGameOver();
+        isGameOver ? clearTimer() : renderFrame();
+      }, 200);
+    </script>
+  </body>
+</html>

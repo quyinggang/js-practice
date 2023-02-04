@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>刮刮乐效果</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #canvas {
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="400" height="200"></canvas>
+  <script>
+    const canvasElement = document.getElementById('canvas');
+    const ctx = canvasElement.getContext('2d');
+    
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(0, 0, 240, 80);
+
+    let isDraw = false;
+    canvasElement.onmousedown = () => isDraw = true;
+    canvasElement.onmouseup = () => isDraw = false;
+    canvasElement.onmousemove = (event) => {
+      if (!isDraw) return
+      const x = event.pageX;
+      const y = event.pageY;
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.arc(x, y, 10, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+  </script>
+</body>
+</html>
