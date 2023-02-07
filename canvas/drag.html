@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图形拖拽移动</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <script>
+      const getRandomColor = () => {
+        const type = "0123456789ABCDEF";
+        const len = type.length;
+        let color = "#";
+        for (let index = 0; index < 6; index++) {
+          color += type[Math.ceil(Math.random() * len)];
+        }
+        return color;
+      };
+      const getNumberInRange = (min, max) => {
+        const r = Math.random();
+        return Math.round(r * (max - min) + min);
+      };
+      class Circle {
+        constructor(x, y, radius, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.color = color;
+        }
+        update(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+        render(ctx) {
+          const { x, y, radius, color } = this;
+          ctx.save();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      class Scene {
+        constructor() {
+          const canvasElement = document.getElementById("canvas");
+          this.ctx = canvasElement.getContext("2d");
+          this.width = canvasElement.width;
+          this.height = canvasElement.height;
+          this.canvasElement = canvasElement;
+          this.selectedCircle = null;
+          this.isDragging = false;
+          this.oldPosition = null;
+          this.circles = this.createCircles();
+          this.bindEvents();
+        }
+        createCircles() {
+          const { width, height } = this;
+          const xRange = [50, width - 50];
+          const yRange = [50, height - 50];
+          const radius = 30;
+          return [
+            new Circle(
+              getNumberInRange(xRange[0], xRange[1]),
+              getNumberInRange(yRange[0], yRange[1]),
+              radius,
+              getRandomColor()
+            ),
+            new Circle(
+              getNumberInRange(xRange[0], xRange[1]),
+              getNumberInRange(yRange[0], yRange[1]),
+              radius,
+              getRandomColor()
+            ),
+          ];
+        }
+        isPointInCircle(shape, point) {
+          const diff = {
+            x: point.x - shape.x,
+            y: point.y - shape.y,
+          };
+          const distance = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+          return distance >= 0 && distance <= shape.radius;
+        }
+        getSelectedCircle(position) {
+          let selectedCircle = null;
+          const circles = this.circles;
+          for (const circle of circles) {
+            if (this.isPointInCircle(circle, position)) {
+              selectedCircle = circle;
+              break;
+            }
+          }
+          return selectedCircle;
+        }
+        bindEvents() {
+          const canvasElement = this.canvasElement;
+          canvasElement.addEventListener(
+            "mousedown",
+            this.onMouseDown.bind(this)
+          );
+          canvasElement.addEventListener(
+            "mousemove",
+            this.onMouseMove.bind(this)
+          );
+          canvasElement.addEventListener("mouseup", this.onMouseUp.bind(this));
+        }
+        onMouseDown(event) {
+          const position = {
+            x: event.pageX,
+            y: event.pageY,
+          };
+          this.isDragging = true;
+          this.oldPosition = position;
+          // 两个图形重叠情况需要额外逻辑
+          this.selectedCircle = this.getSelectedCircle(position);
+        }
+        onMouseMove(event) {
+          const { isDragging, selectedCircle, circles, oldPosition } = this;
+          if (!isDragging || !selectedCircle) return
+          const newPosition = {
+            x: event.pageX,
+            y: event.pageY,
+          };
+          const diff = {
+            x: newPosition.x - oldPosition.x,
+            y: newPosition.y - oldPosition.y
+          }
+          for (const circle of circles) {
+            if (circle === selectedCircle) {
+              const position = {
+                x: circle.x + diff.x,
+                y: circle.y + diff.y
+              }
+              circle.update(position.x, position.y);
+              break;
+            }
+          }
+          this.oldPosition = newPosition;
+          this.renderFrame();
+        }
+        onMouseUp(event) {
+          this.isDragging = false;
+          this.selectedCircle = null;
+        }
+        renderFrame() {
+          const { ctx, circles, width, height } = this;
+          ctx.clearRect(0, 0, width, height);
+          for (const circle of circles) {
+            circle.render(ctx);
+          }
+        }
+      }
+
+      const scene = new Scene();
+      scene.renderFrame();
+    </script>
+  </body>
+</html>
