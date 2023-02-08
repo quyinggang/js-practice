@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>离屏Canvas</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #canvas {
+        width: 600px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="1200" height="800"></canvas>
+    <script>
+      const getRandomColor = () => {
+        const type = "0123456789ABCDEF";
+        const len = type.length;
+        let color = "#";
+        for (let index = 0; index < 6; index++) {
+          color += type[Math.ceil(Math.random() * len)];
+        }
+        return color;
+      };
+      const getNumberInRange = (min, max) => {
+        const r = Math.random();
+        return r * (max - min) + min;
+      };
+      class BufferCanvas {
+        constructor(radius) {
+          this.radius = radius;
+          this.width = radius * 2 + 2;
+          this.height = radius * 2 + 2;
+          this.canvas = this.createCanvas();
+          this.ctx = this.canvas.getContext("2d");
+          this.cache();
+        }
+        createCanvas() {
+          const { width, height } = this
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          return canvas;
+        }
+        cache() {
+          const { ctx, radius } = this
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(radius + 1, radius + 1, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+        render(ctx, ball) {
+          ctx.drawImage(this.canvas, ball.x, ball.y);
+        }
+      }
+      class Ball {
+        constructor(x, y, vx, vy, radius) {
+          this.x = x;
+          this.y = y;
+          this.vx = vx;
+          this.vy = vy;
+          this.radius = radius;
+        }
+        update(boundary) {
+          const { x, y, vx, vy, radius } = this;
+          const newPosition = {
+            x: x + vx,
+            y: y + vy,
+          };
+          if (
+            newPosition.x > boundary.maxX - radius ||
+            newPosition.x < boundary.minX + radius
+          ) {
+            this.vx = -vx;
+          }
+          if (
+            newPosition.y > boundary.maxY - radius ||
+            newPosition.y < boundary.minY + radius
+          ) {
+            this.vy = -vy;
+          }
+          this.x = newPosition.x;
+          this.y = newPosition.y;
+        }
+        render(ctx) {
+          const { radius, x, y } = this
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      class Scene {
+        constructor(useCache) {
+          const canvasElement = document.getElementById("canvas");
+          const width = canvasElement.width;
+          const height = canvasElement.height;
+          this.ctx = canvasElement.getContext("2d");
+          this.boundary = {
+            minX: 0,
+            minY: 0,
+            maxX: width,
+            maxY: height,
+          };
+          this.width = width;
+          this.height = height;
+          this.useCache = !!useCache;
+          this.shapeMap = null;
+          this.balls = [];
+          this.ballRadius = 20;
+          this.createBalls();
+          if (this.useCache) {
+            this.bufferCanvas = new BufferCanvas(this.ballRadius);
+          }
+        }
+        createBalls() {
+          const { width, height, ctx, ballRadius } = this;
+          const balls = [];
+          const offset = 10;
+          for (let index = 0; index < 10000; index++) {
+            const color = getRandomColor();
+            const x = getNumberInRange(offset, width - offset);
+            const y = getNumberInRange(offset, height - offset);
+            const radius = getNumberInRange(10, 20);
+            const vx = getNumberInRange(-2, 2);
+            const vy = getNumberInRange(-2, 2);
+            balls.push(new Ball(x, y, vx, vy, ballRadius));
+          }
+          this.balls = balls;
+        }
+        render() {
+          const { ctx, width, height, balls, boundary, bufferCanvas, useCache } = this;
+          ctx.clearRect(0, 0, width, height);
+          for (const ball of balls) {
+            ball.update(boundary);
+            if (useCache) {
+              bufferCanvas.render(ctx, ball);
+            } else {
+              ball.render(ctx);
+            }
+          }
+          window.requestAnimationFrame(this.render.bind(this));
+        }
+      }
+
+      const scene = new Scene(true);
+      scene.render();
+    </script>
+  </body>
+</html>
