@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>局部渲染</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #canvas {
+        width: 600px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="1200" height="800"></canvas>
+    <script>
+      const getNumberInRange = (min, max) => {
+        return Math.round(Math.random() * (max - min) + min);
+      };
+      const getRandomColor = () => {
+        const type = "0123456789ABCDEF";
+        const len = type.length;
+        let color = "#";
+        for (let index = 0; index < 6; index++) {
+          color += type[Math.ceil(Math.random() * len)];
+        }
+        return color;
+      };
+      class Circle {
+        constructor(x, y, radius, color) {
+          this.radius = radius;
+          this.color = color;
+          this.update(x, y);
+        }
+        update(x, y) {
+          this.x = x;
+          this.y = y;
+          this.enclosureBox = this.computeEnclosureBox();
+        }
+        // 包围盒
+        computeEnclosureBox() {
+          const { x, y, radius } = this;
+          return {
+            minX: x - radius,
+            minY: y - radius,
+            maxX: x + radius,
+            maxY: y + radius,
+          };
+        }
+        render(ctx) {
+          const { x, y, radius, color } = this;
+          ctx.save();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      class Scene {
+        constructor(useLocalRender) {
+          const canvasElement = document.getElementById("canvas");
+          this.width = canvasElement.width;
+          this.height = canvasElement.height;
+          this.offset = 20;
+          this.useLocalRender = !!useLocalRender;
+          this.ctx = canvasElement.getContext("2d");
+          this.circles = this.createCircles();
+          this.globalRender();
+        }
+        createCircles() {
+          const { width, height, offset } = this;
+          const circles = [];
+          for (let index = 0; index < 10000; index++) {
+            const x = getNumberInRange(offset, width - offset);
+            const y = getNumberInRange(offset, height - offset);
+            const radius = getNumberInRange(10, 20);
+            const color = getRandomColor();
+            circles.push(new Circle(x, y, radius, color));
+          }
+          return circles;
+        }
+        renderCircles() {
+          const { ctx, circles } = this;
+          for (const circle of circles) {
+            circle.render(ctx);
+          }
+        }
+        globalRender() {
+          const { ctx, width, height } = this;
+          ctx.clearRect(0, 0, width, height);
+          this.renderCircles();
+        }
+        localRender() {
+          const needRerenderCircles = [];
+          const { ctx, width, height, dirtyRect, circles } = this;
+          if (
+            width - dirtyRect.width <= 50 &&
+            height - dirtyRect.height <= 50
+          ) {
+            this.globalRender();
+            return;
+          }
+          for (const circle of circles) {
+            const box = circle.enclosureBox;
+            if (this.checkIsIntersect(dirtyRect, box)) {
+              needRerenderCircles.push(circle);
+            }
+          }
+          const { x: rx, y: ry, width: rw, height: rh } = dirtyRect;
+          ctx.clearRect(rx, ry, rw, rh);
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(rx, ry, rw, rh);
+          ctx.clip();
+          for (const circle of needRerenderCircles) {
+            circle.render(ctx);
+          }
+          ctx.restore();
+        }
+        // 计算是否与脏矩形相交
+        checkIsIntersect(dirtyRect, box) {
+          const boxSize = {
+            width: box.maxX - box.minX,
+            height: box.maxY - box.minY,
+          };
+          const boxCenter = {
+            x: box.minX + boxSize.width / 2,
+            y: box.minY + boxSize.height / 2
+          };
+          const dirtyRectCenter = {
+            x: dirtyRect.x + dirtyRect.width / 2,
+            y: dirtyRect.y + dirtyRect.height / 2,
+          };
+          const diffX = Math.abs(dirtyRectCenter.x - boxCenter.x);
+          const diffY = Math.abs(dirtyRectCenter.y - boxCenter.y);
+          return (
+            diffX <= (boxSize.width + dirtyRect.width) / 2 &&
+            diffY <= (boxSize.height + dirtyRect.height) / 2
+          );
+        }
+        // 计算脏矩形区域
+        computeDirtyRect(oldBox, newBox) {
+          const minX = Math.min(oldBox.minX, newBox.minX);
+          const minY = Math.min(oldBox.minY, newBox.minY);
+          const maxX = Math.max(oldBox.maxX, newBox.maxX);
+          const maxY = Math.max(oldBox.maxY, newBox.maxY);
+          return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+          };
+        }
+        update() {
+          const { circles, width, height, offset, useLocalRender } = this;
+          const index = getNumberInRange(0, circles.length - 1);
+          const x = getNumberInRange(offset, width - offset);
+          const y = getNumberInRange(offset, height - offset);
+          const circle = circles[index];
+          const oldBox = circle.enclosureBox;
+          circle.update(x, y);
+          if (useLocalRender) {
+            this.dirtyRect = this.computeDirtyRect(oldBox, circle.enclosureBox);
+          }
+        }
+        animate() {
+          this.update();
+          this.useLocalRender ? this.localRender() : this.globalRender();
+          window.requestAnimationFrame(this.animate.bind(this));
+        }
+      }
+
+      const scene = new Scene(true);
+      scene.animate();
+    </script>
+  </body>
+</html>
