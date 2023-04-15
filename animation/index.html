@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JavaScript动画引擎</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .box1 {
+        width: 100px;
+        height: 100px;
+        background: red;
+      }
+      .box2 {
+        width: 100px;
+        height: 100px;
+        background: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box1"></div>
+    <div class="box2"></div>
+    <script type="module">
+      import animation from "./index.js";
+      const instance1 = new animation({
+        targets: '.box1',
+        translateX: 250,
+        delay: 600,
+        duration: 800,
+      });
+      const instance2 = new animation({
+        targets: '.box2',
+        translateX: 250,
+        delay: 1400,
+        duration: 800,
+      });
+      instance1.play();
+      instance2.play();
+    </script>
+  </body>
+</html>

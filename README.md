@@ -143,3 +143,6 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 
 #### dynamic-theme   
 实现动态主题   
+
+#### animation   
+实现简易JavaScript动画引擎   
