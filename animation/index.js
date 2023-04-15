@@ -39,9 +39,12 @@ class Scheduler {
     activeTasks.length > 0 ? this.run() : (this.raf = null);
   }
   run() {
-    const newActiveTasks = this.pendingTasks.filter(task => task.isActive);
-    this.activeTasks.push(...newActiveTasks);
     this.raf = window.requestAnimationFrame(this.step.bind(this));
+  }
+  start() {
+    const newActiveTasks = this.pendingTasks.filter(task => task.isActive);
+    this.activeTasks = [...this.activeTasks, ...newActiveTasks];
+    this.run();
   }
   push(task) {
     this.pendingTasks.push(task);
@@ -82,7 +85,7 @@ class Task {
       // 根据当前时长和总时长计算出占比
       const elapsed = minMax(currentDuration, 0, duration) / duration;
       // 可以应用不同的运行效果，即使用运动效果函数改变elapsed值
-      const eased  = Number.isNaN(elapsed) ? 1 : 1;
+      const eased  = Number.isNaN(elapsed) ? 1 : elapsed;
       const value = from + (eased * (to - from));
       this.currentValue = value;
       for (const element of elements) {
@@ -91,6 +94,8 @@ class Task {
     }
     if (currentDuration >= duration) {
       this.isComplete = true;
+      this.isActive = false;
+      this.startTime = 0;
     }
   }
   tick(time) {
@@ -103,6 +108,10 @@ class Task {
   }
   active() {
     this.isActive = true;
+  }
+  restart() {
+    this.startTime = 0;
+    this.isComplete = false;
   }
 }
 
@@ -151,7 +160,11 @@ class Animation {
   }
   play() {
     this.task.active();
-    scheduler.run();
+    scheduler.start();
+  }
+  replay() {
+    this.task.restart();
+    this.play();
   }
 }
 
