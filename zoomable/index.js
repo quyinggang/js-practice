@@ -51,8 +51,6 @@ class Zoomable {
     window.addEventListener("mouseup", handleMouseUp);
   }
 
-  
-
   getRatio(event) {
     const config = this.config;
     const speed = Number(config.speed) || 1;

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>虚拟摇杆</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #ddd;
+      }
+
+      #ball {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 20px;
+        transform-origin: center;
+        background: url("./beetle.png") center no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .joystick {
+        position: absolute;
+        left: 130px;
+        bottom: 140px;
+      }
+
+      .joystick .back {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background-color: green;
+        opacity: 0.5;
+        transform: translate(-50%, -50%);
+      }
+
+      .joystick .front {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        margin: -50px;
+        border-radius: 50%;
+        background-color: green;
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ball"></div>
+    <div class="joystick">
+      <div class="back"></div>
+      <div class="front"></div>
+    </div>
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>

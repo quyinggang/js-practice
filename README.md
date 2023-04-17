@@ -70,3 +70,6 @@ React学习和React同构的入门级demo，可以了解SSR原理、react-redux�
 
 #### animation   
 实现简易JavaScript动画引擎   
+
+#### joystick
+实现虚拟摇杆逻辑  
