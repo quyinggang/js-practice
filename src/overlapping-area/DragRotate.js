@@ -5,6 +5,7 @@ function onMouseMove(e) {
   const currentAngle = instance.getRotateAngle(e.pageX, e.pageY);
   instance.rotation = currentAngle - instance.startAngle;
   instance.render();
+  instance.emit('onRotate')
 }
 
 function onMouseUp(e) {
@@ -13,16 +14,40 @@ function onMouseUp(e) {
   if (!instance.isRotating) return;
   instance.angle += instance.rotation
   instance.unbindEvents();
+  instance.emit('onRotateEnd')
 }
 
-class DragRotate {
-  constructor(element, origin) {
+class EventEmitter {
+  constructor() {
+    this.map = new Map()
+  }
+  on(name, callback) {
+    const map = this.map
+    const value = map.get(name) || []
+    map.set(name, [...value, callback])
+  }
+  emit(name, data) {
+    const value = this.map.get(name)
+    if (Array.isArray(value)) {
+      for (const callback of value) {
+        typeof callback === 'function' && callback(data)
+      }
+    }
+  }
+  off(name, callback) {
+    const value = this.map.get(name) || []
+    const index = value.findIndex((cb) => cb === callback)
+    if (index !== -1) {
+      value.splice(index, 1)
+    }
+  }
+}
+
+class DragRotate extends EventEmitter {
+  constructor(element) {
+    super()
     if (!element) return;
     this.element = element;
-    this.width = element.offsetWidth;
-    this.height = element.offsetHeight;
-    // 旋转点
-    this.origin = origin || [this.width / 2, this.height / 2];
     this.point = null;
     this.angle = 0;
     this.rotation = 0
@@ -34,11 +59,13 @@ class DragRotate {
 
   init() {
     const element = this.element;
-    const [originX, originY] = this.origin;
-    element.style.transformOrigin = `${originX} ${originY}`;
     const bounding = element.getBoundingClientRect();
-    this.center = { x: originX + bounding.left, y: originY + bounding.top }
+    const originX = bounding.width * 0.5;
+    const originY = bounding.height * 0.5;
+    element.style.transformOrigin = `${originX} ${originY}`;
     this.bindEvents();
+    this.boundingRect = bounding
+    this.center = { x: originX + bounding.left, y: originY + bounding.top }
   }
 
   bindEvents() {
@@ -48,6 +75,7 @@ class DragRotate {
     element.addEventListener("mousedown", (e) => {
       this.isRotating = true;
       this.startAngle = this.getRotateAngle(e.pageX, e.pageY)
+      this.emit('onRotateStart')
       document.addEventListener("mousemove", this.onMouseMove);
       document.addEventListener("mouseup", this.onMouseUp);
     });

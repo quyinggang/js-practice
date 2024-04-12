@@ -21,3 +21,4 @@ JavaScript实践案例，旨在学习了解相关技术思想
 - dynamic-theme：实现动态主题   
 - animation：实现简易JavaScript动画引擎   
 - joystick：实现虚拟摇杆逻辑  
+- overlapping-area：旋转后矩形重叠区域的面积计算，包括多边形交点计算逻辑、多边形面积计算逻辑

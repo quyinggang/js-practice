@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>重叠面积计算</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 400px;
+        height: 250px;
+        transform: translate(-50%, -50%);
+        border: 1px solid #ddd;
+      }
+
+      .box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: green;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="box"></div>
+    </div>
+
+    <script type="module">
+      import DragRotate from "./DragRotate.js";
+
+      const element = document.querySelector(".box")
+      const dragRotate = new DragRotate(element);
+      const boundingRect = dragRotate.boundingRect;
+      const halfWidth = boundingRect.width * 0.5;
+      const halfHeight = boundingRect.height * 0.5;
+      const boxArea = halfWidth * halfHeight * 4
+      const points = [
+        [-halfWidth, halfHeight],
+        [halfWidth, halfHeight],
+        [halfWidth, -halfHeight],
+        [-halfWidth, -halfHeight],
+      ];
+
+      // 计算旋转后点的坐标
+      function rotatePoint(point, angle) {
+        const [x, y] = point;
+        const radians = angle * (Math.PI / 180);
+        const cosAngle = Math.cos(radians);
+        const sinAngle = Math.sin(radians);
+        return [x * cosAngle - y * sinAngle, x * sinAngle + y * cosAngle];
+      }
+
+      // 获取交点坐标
+      function getIntersection(p1, p2, p3, p4) {
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+        const [x3, y3] = p3;
+        const [x4, y4] = p4;
+
+        const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (denominator === 0) {
+          return null; // 平行或共线
+        }
+
+        const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
+        const u =
+          -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+          const x = x1 + t * (x2 - x1);
+          const y = y1 + t * (y2 - y1);
+          return [x, y];
+        }
+      }
+
+      // 获取矩形重叠部分的多边形坐标
+      function getOverlapPolygon(vertices1, vertices2) {
+        const intersectionPoints = [];
+
+        for (let i = 0; i < vertices1.length; i++) {
+          const p1 = vertices1[i];
+          const p2 = vertices1[(i + 1) % vertices1.length];
+          for (let j = 0; j < vertices2.length; j++) {
+            const p3 = vertices2[j];
+            const p4 = vertices2[(j + 1) % vertices2.length];
+            const intersectionPoint = getIntersection(p1, p2, p3, p4);
+            intersectionPoint && intersectionPoints.push(intersectionPoint);
+          }
+        }
+
+        return intersectionPoints;
+      }
+
+      function calculatePolygonArea(vertices) {
+        let area = 0;
+        const n = vertices.length;
+        for (let i = 0; i < n; i++) {
+          const current = vertices[i];
+          const next = vertices[(i + 1) % n];
+          area += current[0] * next[1] - current[1] * next[0];
+        }
+        return Math.abs(area / 2);
+      }
+
+      // 计算多边形的中心点
+      function calculateCenter(vertices) {
+        const center = [0, 0];
+        for (const vertex of vertices) {
+          center[0] += vertex[0];
+          center[1] += vertex[1];
+        }
+        center[0] /= vertices.length;
+        center[1] /= vertices.length;
+        return center;
+      }
+
+      // 根据顶点坐标对多边形的顶点按顺时针排序
+      function sortClockwise(vertices) {
+        const center = calculateCenter(vertices);
+        return vertices.sort((a, b) => {
+          const angleA = Math.atan2(a[1] - center[1], a[0] - center[0]);
+          const angleB = Math.atan2(b[1] - center[1], b[0] - center[0]);
+          return angleA - angleB;
+        });
+      }
+
+      dragRotate.on("onRotateEnd", () => {
+        const angle = dragRotate.angle;
+        const center = dragRotate.center;
+        const rotatePoints = points.map((point) => rotatePoint(point, angle));
+        const polygonPoints = getOverlapPolygon(points, rotatePoints);
+
+        // 计算重叠部分的多边形面积
+        const sortedPoints = sortClockwise(polygonPoints)
+        const area = calculatePolygonArea(sortedPoints)
+
+        window.alert(`当前面积：${Math.round(area)} / 总面积：${boxArea}`)
+      });
+    </script>
+  </body>
+</html>
