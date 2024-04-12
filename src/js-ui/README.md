@@ -2,76 +2,76 @@
 
 **button**
 
-![音乐播放控制条](../images/button.png)
+![音乐播放控制条](../../images/button.png)
 
 **switch**
 
-![切换按钮](../images/switch.png)
+![切换按钮](../../images/switch.png)
 
 **slider**
 
-![slider](../images/slider.png)
+![slider](../../images/slider.png)
 
 **input**
 
-![input](../images/input.png)    
+![input](../../images/input.png)    
 
 **loading**     
-![loading](../images/loading.png)     
+![loading](../../images/loading.png)     
 
 **radio**    
-![radio](../images/radio.png)   
+![radio](../../images/radio.png)   
 
 **checkbox**   
-![checkbox](../images/checkbox.png)   
+![checkbox](../../images/checkbox.png)   
 
 **rate**    
-![rate](../images/rate.png)  
+![rate](../../images/rate.png)  
 
 **tooltip**      
-![tooltip](../images/tooltip.png)   
+![tooltip](../../images/tooltip.png)   
 
 **message**    
-![message](../images/message.png)   
+![message](../../images/message.png)   
 
 **tabs**    
-![tabs](../images/tabs.png)    
+![tabs](../../images/tabs.png)    
 
 **collapse**     
-![collapse](../images/collapse.png)   
+![collapse](../../images/collapse.png)   
 
 **badge**     
-![badge](../images/badge.png)    
+![badge](../../images/badge.png)    
 
 **carousel**   
-![carousel](../images/carousel.png)  
+![carousel](../../images/carousel.png)  
 
 **scrollbar**    
-![scrollbar](../images/scrollbar.png)   
+![scrollbar](../../images/scrollbar.png)   
 
 **select**    
-![select](../images/select.png)   
+![select](../../images/select.png)   
 
 **Notification**   
-![notice](../images/notice.png)  
+![notice](../../images/notice.png)  
 
 **MessageBox**   
-![messageBox](../images/messageBox.png)  
+![messageBox](../../images/messageBox.png)  
 
 **Color-Picker**    
-![colorPicker](../images/colorPicker.png)    
+![colorPicker](../../images/colorPicker.png)    
 
 **Upload**    
 > 上传进度以及上传之后查看删除都没有在页面体现，你可以通过控制台查看上传进度
-![upload](../images/upload.png)    
+![upload](../../images/upload.png)    
 
 **Table**     
 > 该demo实现固定表头和固定列（只固定在左侧）的效果    
-![table](../images/table.gif)  
+![table](../../images/table.gif)  
 
 **Cascader**   
 > 级联选择器    
-![cascader](../images/cascader.gif)    
+![cascader](../../images/cascader.gif)    
 
 **Transfer**   
-![transfer](../images/transfer.png)    
+![transfer](../../images/transfer.png)    
