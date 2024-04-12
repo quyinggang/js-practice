@@ -19,7 +19,7 @@
     },
     scroll: function(val, isTop) {
       this.rellaxes.forEach(item => {
-        item.style.cssText = `background: url(../images/parallax.jpg) center ${val}px no-repeat`;
+        item.style.cssText = `background: url(./images/parallax.jpg) center ${val}px no-repeat`;
       });
     },
     onEvents: function() {
